@@ -348,31 +348,55 @@ function ChemistryLabScene() {
         FUME HOOD
       </Text>
       
-      {/* ORGANIC SOLVENTS CABINET */}
-      <Box args={[1.5, 4, 6]} position={[-8.5, 2.5, 2]} castShadow>
+      {/* ORGANIC SOLVENTS SHELF - Open Frame Structure */}
+      {/* Back Panel */}
+      <Box args={[0.1, 4, 6]} position={[-9.3, 2.5, 2]} castShadow>
         <meshStandardMaterial color="#e67e22" />
       </Box>
       
+      {/* Side Supports */}
+      <Box args={[1.6, 4, 0.1]} position={[-8.5, 2.5, -1]} castShadow>
+        <meshStandardMaterial color="#e67e22" />
+      </Box>
+      <Box args={[1.6, 4, 0.1]} position={[-8.5, 2.5, 5]} castShadow>
+        <meshStandardMaterial color="#e67e22" />
+      </Box>
+      
+      {/* Shelf Levels */}
+      {[1.0, 2.5, 4.0].map((y, shelfIndex) => (
+        <Box key={shelfIndex} args={[1.4, 0.15, 5.8]} position={[-8.6, y, 2]} castShadow>
+          <meshStandardMaterial color="#8b4513" roughness={0.7} />
+        </Box>
+      ))}
+      
       {/* Solvent Bottles */}
       {[
-        { name: 'Acetone', color: '#f39c12', pos: -2 },
-        { name: 'Ethanol', color: '#3498db', pos: -0.5 },
-        { name: 'Methanol', color: '#9b59b6', pos: 1 },
-        { name: 'Hexane', color: '#1abc9c', pos: 2.5 }
+        { name: 'Acetone', color: '#f39c12', pos: -1.5, shelf: 4.0 },
+        { name: 'Ethanol', color: '#3498db', pos: 0.5, shelf: 4.0 },
+        { name: 'Methanol', color: '#9b59b6', pos: 2.5, shelf: 2.5 },
+        { name: 'Hexane', color: '#1abc9c', pos: 4.5, shelf: 2.5 }
       ].map((solvent, i) => (
-        <group key={`solvent-${i}`} position={[-7.8, 3.5, solvent.pos]}>
-          <Cylinder args={[0.15, 0.15, 0.5]}>
+        <group key={`solvent-${i}`} position={[-8.2, solvent.shelf, solvent.pos]}>
+          {/* Bottle Body */}
+          <Cylinder args={[0.15, 0.15, 0.5]} position={[0, 0, 0]}>
             <meshStandardMaterial color={solvent.color} transparent opacity={0.7} />
           </Cylinder>
-          <Cylinder args={[0.1, 0.1, 0.06]} position={[0, 0.28, 0]}>
+          {/* Bottle Cap */}
+          <Cylinder args={[0.12, 0.12, 0.08]} position={[0, 0.29, 0]}>
             <meshStandardMaterial color="#2c3e50" />
           </Cylinder>
+          {/* Label Background */}
+          <Box args={[0.32, 0.15, 0.01]} position={[0, 0, -0.16]}>
+            <meshStandardMaterial color="#ffffff" />
+          </Box>
+          {/* Chemical Name on Label */}
           <Text
-            position={[0, -0.35, 0]}
-            fontSize={0.08}
-            color="white"
+            position={[0, 0, -0.17]}
+            fontSize={0.06}
+            color="#2c3e50"
             anchorX="center"
-            rotation={[0, -Math.PI/2, 0]}
+            anchorY="middle"
+            rotation={[0, Math.PI, 0]}
           >
             {solvent.name}
           </Text>
