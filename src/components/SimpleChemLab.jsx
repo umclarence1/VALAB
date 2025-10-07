@@ -584,7 +584,7 @@ function ChemistryLabScene() {
         { name: 'NH₄OH', color: '#16a085', pos: 0.5 },
         { name: 'Ca(OH)₂', color: '#1abc9c', pos: 2.5 }
       ].map((chemical, i) => (
-        <group key={`base-${i}`} position={[8.2, 4.2, chemical.pos]}>
+        <group key={`base-${i}`} position={[8.2, 4.05, chemical.pos]}>
           {/* Bottle Body */}
           <Cylinder args={[0.15, 0.15, 0.5]} position={[0, 0, 0]}>
             <meshStandardMaterial color={chemical.color} transparent opacity={0.7} />
@@ -617,7 +617,7 @@ function ChemistryLabScene() {
         { name: 'FeCl₃', color: '#f39c12', pos: 0.5 },
         { name: 'AgNO₃', color: '#95a5a6', pos: 2.5 }
       ].map((chemical, i) => (
-        <group key={`salt-${i}`} position={[8.2, 2.7, chemical.pos]}>
+        <group key={`salt-${i}`} position={[8.2, 2.55, chemical.pos]}>
           {/* Bottle Body */}
           <Cylinder args={[0.15, 0.15, 0.5]} position={[0, 0, 0]}>
             <meshStandardMaterial color={chemical.color} transparent opacity={0.8} />
