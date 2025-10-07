@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Text, Box, Cylinder, Sphere, OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
+import InteractiveLabel from './InteractiveLabel'
 
 function LabEquipment({ position, type, onClick, isSelected }) {
   const meshRef = useRef()
@@ -30,9 +31,14 @@ function LabEquipment({ position, type, onClick, isSelected }) {
             <Cylinder args={[0.3, 0.4, 0.8]} position={[0, 0.4, 0]}>
               <meshLambertMaterial color={getEquipmentColor()} transparent opacity={0.8} />
             </Cylinder>
-            <Text position={[0, -0.3, 0]} fontSize={0.1} color="white" anchorX="center">
-              Beaker
-            </Text>
+            <InteractiveLabel 
+              position={[0, -0.3, 0]} 
+              text="Beaker" 
+              fontSize={0.08}
+              itemName="Glass Beaker"
+              description="Used for mixing and heating chemical solutions"
+              billboardToCamera={true}
+            />
           </group>
         )
       case 'flask':
@@ -44,9 +50,14 @@ function LabEquipment({ position, type, onClick, isSelected }) {
             <Cylinder args={[0.1, 0.1, 0.4]} position={[0, 0.7, 0]}>
               <meshLambertMaterial color={getEquipmentColor()} transparent opacity={0.8} />
             </Cylinder>
-            <Text position={[0, -0.3, 0]} fontSize={0.1} color="white" anchorX="center">
-              Flask
-            </Text>
+            <InteractiveLabel 
+              position={[0, -0.3, 0]} 
+              text="Flask" 
+              fontSize={0.08}
+              itemName="Conical Flask"
+              description="Used for mixing and storing chemical solutions"
+              billboardToCamera={true}
+            />
           </group>
         )
       case 'testtube':
@@ -55,9 +66,14 @@ function LabEquipment({ position, type, onClick, isSelected }) {
             <Cylinder args={[0.05, 0.05, 0.6]} position={[0, 0.3, 0]}>
               <meshLambertMaterial color={getEquipmentColor()} transparent opacity={0.8} />
             </Cylinder>
-            <Text position={[0, -0.2, 0]} fontSize={0.08} color="white" anchorX="center">
-              Test Tube
-            </Text>
+            <InteractiveLabel 
+              position={[0, -0.2, 0]} 
+              text="Test Tube" 
+              fontSize={0.06}
+              itemName="Glass Test Tube"
+              description="Used for small-scale chemical reactions and testing"
+              billboardToCamera={true}
+            />
           </group>
         )
       case 'burner':
@@ -69,9 +85,14 @@ function LabEquipment({ position, type, onClick, isSelected }) {
             <Cylinder args={[0.05, 0.05, 0.2]} position={[0, 0.4, 0]}>
               <meshLambertMaterial color="#333333" />
             </Cylinder>
-            <Text position={[0, -0.2, 0]} fontSize={0.08} color="white" anchorX="center">
-              Bunsen Burner
-            </Text>
+            <InteractiveLabel 
+              position={[0, -0.2, 0]} 
+              text="Bunsen Burner" 
+              fontSize={0.06}
+              itemName="Bunsen Burner"
+              description="Gas burner used for heating chemical solutions"
+              billboardToCamera={true}
+            />
           </group>
         )
       default:
