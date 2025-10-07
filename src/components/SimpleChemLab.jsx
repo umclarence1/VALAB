@@ -93,7 +93,7 @@ function LabEquipment({ position, type, onClick, isSelected }) {
 
 // Camera initialization component
 function CameraController() {
-  const { camera, gl } = useThree()
+  const { camera, gl, scene, invalidate } = useThree()
   
   useEffect(() => {
     // Set camera position immediately on mount
@@ -101,9 +101,15 @@ function CameraController() {
     camera.lookAt(0, 2, 0)
     camera.updateProjectionMatrix()
     
-    // Force a render to apply changes immediately
-    gl.render()
-  }, [camera, gl])
+    // Ensure the renderer is properly sized
+    const canvas = gl.domElement
+    if (canvas) {
+      gl.setSize(canvas.clientWidth, canvas.clientHeight, false)
+    }
+    
+    // Force a re-render to apply changes immediately
+    invalidate()
+  }, [camera, gl, scene, invalidate])
   
   return null
 }
@@ -118,23 +124,32 @@ function ChemistryLabScene() {
 
   return (
     <>
+      {/* Camera Controller for immediate initialization */}
+      <CameraController />
+      
       {/* Lighting */}
       <ambientLight intensity={0.8} />
       <directionalLight position={[5, 10, 5]} intensity={1.5} color="#ffffff" castShadow />
       <pointLight position={[0, 5, 0]} intensity={1} color="#ffffff" />
       
-      {/* Camera Controls - Immersive First Person View */}
+      {/* Camera Controls - Properly Configured */}
       <OrbitControls 
+        makeDefault
         enablePan={true}
         enableZoom={true}
-        maxPolarAngle={Math.PI / 2.0}
-        minPolarAngle={-Math.PI / 4}
-        maxDistance={12}
-        minDistance={2}
+        enableRotate={true}
+        maxPolarAngle={Math.PI / 2.1}
+        minPolarAngle={Math.PI / 6}
+        maxDistance={15}
+        minDistance={3}
         target={[0, 2, 0]}
         enableDamping={true}
-        dampingFactor={0.08}
+        dampingFactor={0.05}
+        rotateSpeed={0.8}
+        zoomSpeed={1.0}
+        panSpeed={0.8}
         autoRotate={false}
+        regress
       />
       
       {/* ROOM STRUCTURE - Immersive Scale */}
@@ -998,14 +1013,32 @@ function ChemistryLab({ onBack }) {
       overflow: 'hidden'
     }}>
       <Canvas 
-        camera={{ position: [0, 3, 6], fov: 75 }}
+        camera={{ 
+          position: [0, 4, 8], 
+          fov: 75,
+          near: 0.1,
+          far: 1000
+        }}
         aria-label="Virtual Chemistry Laboratory"
         role="application"
         shadows
+        gl={{ 
+          antialias: true,
+          alpha: false,
+          preserveDrawingBuffer: false,
+          powerPreference: "high-performance"
+        }}
         style={{ 
           width: '100%', 
           height: '100%',
-          display: 'block'
+          display: 'block',
+          background: '#f0f0f0'
+        }}
+        onCreated={({ gl, camera }) => {
+          // Ensure the canvas fills the viewport immediately
+          gl.setSize(window.innerWidth, window.innerHeight)
+          camera.aspect = window.innerWidth / window.innerHeight
+          camera.updateProjectionMatrix()
         }}
       >
         <ChemistryLabScene />
