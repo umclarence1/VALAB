@@ -489,24 +489,31 @@ function ChemistryLabScene() {
       
       {/* Chemical Bottles - Third Shelf (Salts) */}
       {[
-        { name: 'NaCl', color: '#3498db', pos: -3.5 },
-        { name: 'KI', color: '#9b59b6', pos: -1.5 },
-        { name: 'AgNO₃', color: '#95a5a6', pos: 0.5 },
-        { name: 'CuSO₄', color: '#2980b9', pos: 2.5 }
+        { name: 'NaCl', color: '#ffffff', pos: -3.5 },
+        { name: 'CuSO₄', color: '#3498db', pos: -1.5 },
+        { name: 'FeCl₃', color: '#f39c12', pos: 0.5 },
+        { name: 'AgNO₃', color: '#95a5a6', pos: 2.5 }
       ].map((chemical, i) => (
-        <group key={`salt-${i}`} position={[7.8, 2.8, chemical.pos]}>
-          <Cylinder args={[0.12, 0.12, 0.4]}>
+        <group key={`salt-${i}`} position={[8.2, 2.7, chemical.pos]}>
+          {/* Bottle Body */}
+          <Cylinder args={[0.15, 0.15, 0.5]} position={[0, 0, 0]}>
             <meshStandardMaterial color={chemical.color} transparent opacity={0.8} />
           </Cylinder>
-          <Cylinder args={[0.08, 0.08, 0.05]} position={[0, 0.22, 0]}>
+          {/* Bottle Cap */}
+          <Cylinder args={[0.12, 0.12, 0.08]} position={[0, 0.29, 0]}>
             <meshStandardMaterial color="#2c3e50" />
           </Cylinder>
+          {/* Label Background */}
+          <Box args={[0.32, 0.15, 0.01]} position={[0, 0, 0.16]}>
+            <meshStandardMaterial color="#ffffff" />
+          </Box>
+          {/* Chemical Name on Label */}
           <Text
-            position={[0, -0.3, 0]}
-            fontSize={0.08}
-            color="white"
+            position={[0, 0, 0.17]}
+            fontSize={0.06}
+            color="#2c3e50"
             anchorX="center"
-            rotation={[0, Math.PI/2, 0]}
+            anchorY="middle"
           >
             {chemical.name}
           </Text>
@@ -520,19 +527,26 @@ function ChemistryLabScene() {
         { name: 'C₂H₅OH', color: '#f1c40f', pos: 0.5 },
         { name: 'C₆H₆', color: '#e67e22', pos: 2.5 }
       ].map((chemical, i) => (
-        <group key={`catalyst-${i}`} position={[7.8, 1.3, chemical.pos]}>
-          <Cylinder args={[0.12, 0.12, 0.4]}>
+        <group key={`catalyst-${i}`} position={[8.2, 1.2, chemical.pos]}>
+          {/* Bottle Body */}
+          <Cylinder args={[0.15, 0.15, 0.5]} position={[0, 0, 0]}>
             <meshStandardMaterial color={chemical.color} transparent opacity={0.8} />
           </Cylinder>
-          <Cylinder args={[0.08, 0.08, 0.05]} position={[0, 0.22, 0]}>
+          {/* Bottle Cap */}
+          <Cylinder args={[0.12, 0.12, 0.08]} position={[0, 0.29, 0]}>
             <meshStandardMaterial color="#2c3e50" />
           </Cylinder>
+          {/* Label Background */}
+          <Box args={[0.32, 0.15, 0.01]} position={[0, 0, 0.16]}>
+            <meshStandardMaterial color="#ffffff" />
+          </Box>
+          {/* Chemical Name on Label */}
           <Text
-            position={[0, -0.3, 0]}
-            fontSize={0.08}
-            color="white"
+            position={[0, 0, 0.17]}
+            fontSize={0.06}
+            color="#2c3e50"
             anchorX="center"
-            rotation={[0, Math.PI/2, 0]}
+            anchorY="middle"
           >
             {chemical.name}
           </Text>
