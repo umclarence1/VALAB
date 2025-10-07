@@ -357,6 +357,43 @@ function ChemistryLabScene() {
         INDICATORS
       </Text>
       
+      {/* Additional Equipment on Indicator Shelf */}
+      
+      {/* Pipettes on Bottom Shelf */}
+      <group position={[5.1, 2.65, -8]}>
+        <Cylinder args={[0.01, 0.01, 0.25]} position={[0, 0.125, 0]}>
+          <meshStandardMaterial color="#ffffff" transparent opacity={0.9} />
+        </Cylinder>
+        <Sphere args={[0.03]} position={[0, 0.27, 0]}>
+          <meshStandardMaterial color="#e74c3c" transparent opacity={0.8} />
+        </Sphere>
+        <Text position={[0, -0.05, 0]} fontSize={0.03} color="white" anchorX="center">
+          Pipette
+        </Text>
+      </group>
+      
+      <group position={[5.1, 2.65, -6]}>
+        <Cylinder args={[0.01, 0.01, 0.25]} position={[0, 0.125, 0]}>
+          <meshStandardMaterial color="#ffffff" transparent opacity={0.9} />
+        </Cylinder>
+        <Sphere args={[0.03]} position={[0, 0.27, 0]}>
+          <meshStandardMaterial color="#27ae60" transparent opacity={0.8} />
+        </Sphere>
+        <Text position={[0, -0.05, 0]} fontSize={0.03} color="white" anchorX="center">
+          Pipette
+        </Text>
+      </group>
+      
+      {/* pH Paper on Middle Shelf */}
+      <group position={[5.1, 3.95, -8.5]}>
+        <Box args={[0.15, 0.08, 0.02]} position={[0, 0, 0]}>
+          <meshStandardMaterial color="#f39c12" />
+        </Box>
+        <Text position={[0, -0.08, 0]} fontSize={0.03} color="white" anchorX="center">
+          pH Paper
+        </Text>
+      </group>
+      
       {/* FUME HOOD */}
       <Box args={[4, 3.5, 1.8]} position={[-7, 3.75, -6.5]} castShadow>
         <meshStandardMaterial color="#95a5a6" />
@@ -438,6 +475,43 @@ function ChemistryLabScene() {
         ORGANIC SOLVENTS
       </Text>
       
+      {/* Additional Laboratory Equipment on Organic Shelf */}
+      
+      {/* Test Tubes on Bottom Shelf */}
+      <group position={[-8.2, 1.15, 0.5]}>
+        <Cylinder args={[0.02, 0.02, 0.3]} position={[0, 0.15, 0]}>
+          <meshStandardMaterial color="#87ceeb" transparent opacity={0.8} />
+        </Cylinder>
+        <Cylinder args={[0.025, 0.025, 0.02]} position={[0, 0.31, 0]}>
+          <meshStandardMaterial color="#2c3e50" />
+        </Cylinder>
+        <Text position={[0, -0.05, 0]} fontSize={0.03} color="white" anchorX="center">
+          Test Tube
+        </Text>
+      </group>
+      
+      <group position={[-8.2, 1.15, 1.5]}>
+        <Cylinder args={[0.02, 0.02, 0.3]} position={[0, 0.15, 0]}>
+          <meshStandardMaterial color="#87ceeb" transparent opacity={0.8} />
+        </Cylinder>
+        <Cylinder args={[0.025, 0.025, 0.02]} position={[0, 0.31, 0]}>
+          <meshStandardMaterial color="#2c3e50" />
+        </Cylinder>
+        <Text position={[0, -0.05, 0]} fontSize={0.03} color="white" anchorX="center">
+          Test Tube
+        </Text>
+      </group>
+      
+      {/* Measuring Cylinders on Bottom Shelf */}
+      <group position={[-8.2, 1.2, 3.5]}>
+        <Cylinder args={[0.06, 0.06, 0.4]} position={[0, 0.2, 0]}>
+          <meshStandardMaterial color="#87ceeb" transparent opacity={0.8} />
+        </Cylinder>
+        <Text position={[0, -0.05, 0]} fontSize={0.03} color="white" anchorX="center">
+          Graduated
+        </Text>
+      </group>
+      
       {/* CHEMICAL REAGENT SHELF - Open Frame Structure */}
       {/* Back Panel */}
       <Box args={[0.1, 6, 10]} position={[9.3, 3, 0]} castShadow>
@@ -477,7 +551,7 @@ function ChemistryLabScene() {
         { name: 'HNO₃', color: '#f39c12', pos: 0.5 },
         { name: 'CH₃COOH', color: '#3498db', pos: 2.5 }
       ].map((chemical, i) => (
-        <group key={`acid-${i}`} position={[8.2, 5.7, chemical.pos]}>
+        <group key={`acid-${i}`} position={[8.2, 5.55, chemical.pos]}>
           {/* Bottle Body */}
           <Cylinder args={[0.15, 0.15, 0.5]} position={[0, 0, 0]}>
             <meshStandardMaterial color={chemical.color} transparent opacity={0.7} />
@@ -576,7 +650,7 @@ function ChemistryLabScene() {
         { name: 'C₂H₅OH', color: '#f1c40f', pos: 0.5 },
         { name: 'C₆H₆', color: '#e67e22', pos: 2.5 }
       ].map((chemical, i) => (
-        <group key={`catalyst-${i}`} position={[8.2, 1.2, chemical.pos]}>
+        <group key={`catalyst-${i}`} position={[8.2, 1.05, chemical.pos]}>
           {/* Bottle Body */}
           <Cylinder args={[0.15, 0.15, 0.5]} position={[0, 0, 0]}>
             <meshStandardMaterial color={chemical.color} transparent opacity={0.8} />
@@ -601,6 +675,102 @@ function ChemistryLabScene() {
           </Text>
         </group>
       ))}
+      
+      {/* Laboratory Apparatus on Shelves */}
+      
+      {/* Bunsen Burners on Bottom Shelf */}
+      <group position={[8.3, 1.0, -1]}>
+        <Cylinder args={[0.08, 0.1, 0.15]} position={[0, 0.075, 0]}>
+          <meshStandardMaterial color="#34495e" />
+        </Cylinder>
+        <Cylinder args={[0.03, 0.03, 0.2]} position={[0, 0.25, 0]}>
+          <meshStandardMaterial color="#2c3e50" />
+        </Cylinder>
+        <Text position={[0, -0.1, 0]} fontSize={0.04} color="white" anchorX="center">
+          Bunsen
+        </Text>
+      </group>
+      
+      <group position={[8.3, 1.0, 1]}>
+        <Cylinder args={[0.08, 0.1, 0.15]} position={[0, 0.075, 0]}>
+          <meshStandardMaterial color="#34495e" />
+        </Cylinder>
+        <Cylinder args={[0.03, 0.03, 0.2]} position={[0, 0.25, 0]}>
+          <meshStandardMaterial color="#2c3e50" />
+        </Cylinder>
+        <Text position={[0, -0.1, 0]} fontSize={0.04} color="white" anchorX="center">
+          Bunsen
+        </Text>
+      </group>
+      
+      {/* Conical Flasks on Second Shelf */}
+      <group position={[8.3, 2.5, -1]}>
+        <Sphere args={[0.12]} position={[0, 0.08, 0]}>
+          <meshStandardMaterial color="#87ceeb" transparent opacity={0.8} />
+        </Sphere>
+        <Cylinder args={[0.04, 0.04, 0.25]} position={[0, 0.32, 0]}>
+          <meshStandardMaterial color="#87ceeb" transparent opacity={0.8} />
+        </Cylinder>
+        <Text position={[0, -0.1, 0]} fontSize={0.04} color="white" anchorX="center">
+          Flask
+        </Text>
+      </group>
+      
+      <group position={[8.3, 2.5, 1]}>
+        <Sphere args={[0.12]} position={[0, 0.08, 0]}>
+          <meshStandardMaterial color="#87ceeb" transparent opacity={0.8} />
+        </Sphere>
+        <Cylinder args={[0.04, 0.04, 0.25]} position={[0, 0.32, 0]}>
+          <meshStandardMaterial color="#87ceeb" transparent opacity={0.8} />
+        </Cylinder>
+        <Text position={[0, -0.1, 0]} fontSize={0.04} color="white" anchorX="center">
+          Flask
+        </Text>
+      </group>
+      
+      {/* Beakers on Third Shelf */}
+      <group position={[8.3, 4.0, -1]}>
+        <Cylinder args={[0.12, 0.15, 0.25]} position={[0, 0.125, 0]}>
+          <meshStandardMaterial color="#87ceeb" transparent opacity={0.8} />
+        </Cylinder>
+        <Text position={[0, -0.08, 0]} fontSize={0.04} color="white" anchorX="center">
+          Beaker
+        </Text>
+      </group>
+      
+      <group position={[8.3, 4.0, 1]}>
+        <Cylinder args={[0.12, 0.15, 0.25]} position={[0, 0.125, 0]}>
+          <meshStandardMaterial color="#87ceeb" transparent opacity={0.8} />
+        </Cylinder>
+        <Text position={[0, -0.08, 0]} fontSize={0.04} color="white" anchorX="center">
+          Beaker
+        </Text>
+      </group>
+      
+      {/* Funnels on Top Shelf */}
+      <group position={[8.3, 5.5, -1]}>
+        <Cylinder args={[0.1, 0.02, 0.15]} position={[0, 0.075, 0]}>
+          <meshStandardMaterial color="#ffffff" transparent opacity={0.9} />
+        </Cylinder>
+        <Cylinder args={[0.02, 0.02, 0.1]} position={[0, -0.05, 0]}>
+          <meshStandardMaterial color="#ffffff" transparent opacity={0.9} />
+        </Cylinder>
+        <Text position={[0, -0.15, 0]} fontSize={0.04} color="white" anchorX="center">
+          Funnel
+        </Text>
+      </group>
+      
+      <group position={[8.3, 5.5, 1]}>
+        <Cylinder args={[0.1, 0.02, 0.15]} position={[0, 0.075, 0]}>
+          <meshStandardMaterial color="#ffffff" transparent opacity={0.9} />
+        </Cylinder>
+        <Cylinder args={[0.02, 0.02, 0.1]} position={[0, -0.05, 0]}>
+          <meshStandardMaterial color="#ffffff" transparent opacity={0.9} />
+        </Cylinder>
+        <Text position={[0, -0.15, 0]} fontSize={0.04} color="white" anchorX="center">
+          Funnel
+        </Text>
+      </group>
       
       {/* Shelf Category Labels */}
       <Text
