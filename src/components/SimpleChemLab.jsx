@@ -292,42 +292,67 @@ function ChemistryLabScene() {
         Chemistry Laboratory
       </Text>
       
-      {/* WALL CABINET WITH CHEMICALS */}
-      <Box args={[5, 3, 1.2]} position={[7, 3.5, -7]} castShadow>
+      {/* INDICATOR SOLUTIONS SHELF - Open Frame Structure */}
+      {/* Back Panel */}
+      <Box args={[0.1, 3, 5]} position={[4.2, 3.5, -7]} castShadow>
         <meshStandardMaterial color="#34495e" />
       </Box>
-      <Box args={[4.8, 2.8, 0.1]} position={[7, 3.5, -6.3]}>
-        <meshStandardMaterial color="#2c3e50" />
+      
+      {/* Side Supports */}
+      <Box args={[1.2, 3, 0.1]} position={[4.7, 3.5, -9.5]} castShadow>
+        <meshStandardMaterial color="#34495e" />
+      </Box>
+      <Box args={[1.2, 3, 0.1]} position={[4.7, 3.5, -4.5]} castShadow>
+        <meshStandardMaterial color="#34495e" />
       </Box>
       
-      {/* Indicator Solutions on Cabinet */}
+      {/* Shelf Levels */}
+      {[2.5, 3.8, 5.1].map((y, shelfIndex) => (
+        <Box key={shelfIndex} args={[1.0, 0.1, 4.8]} position={[4.8, y, -7]} castShadow>
+          <meshStandardMaterial color="#8b4513" roughness={0.7} />
+        </Box>
+      ))}
+      
+      {/* Indicator Solutions */}
       {[
-        { name: 'Phenolphthalein', color: '#ff69b4', short: 'PhPh' },
-        { name: 'Methyl Orange', color: '#ff4500', short: 'MO' },
-        { name: 'Litmus', color: '#8a2be2', short: 'Litmus' },
-        { name: 'Universal', color: '#32cd32', short: 'Universal' }
+        { name: 'Phenolphthalein', color: '#ff69b4', short: 'PhPh', pos: -8.5, shelf: 5.1 },
+        { name: 'Methyl Orange', color: '#ff4500', short: 'MO', pos: -7, shelf: 5.1 },
+        { name: 'Litmus', color: '#8a2be2', short: 'Litmus', pos: -5.5, shelf: 3.8 },
+        { name: 'Universal', color: '#32cd32', short: 'Universal', pos: -7, shelf: 3.8 }
       ].map((indicator, i) => (
-        <group key={i} position={[5.5 + i * 0.8, 4.2, -6.2]}>
-          <Cylinder args={[0.1, 0.1, 0.3]}>
+        <group key={i} position={[5.2, indicator.shelf, indicator.pos]}>
+          {/* Bottle Body */}
+          <Cylinder args={[0.12, 0.12, 0.3]} position={[0, 0, 0]}>
             <meshStandardMaterial color={indicator.color} transparent opacity={0.8} />
           </Cylinder>
+          {/* Bottle Cap */}
+          <Cylinder args={[0.1, 0.1, 0.05]} position={[0, 0.18, 0]}>
+            <meshStandardMaterial color="#2c3e50" />
+          </Cylinder>
+          {/* Label Background */}
+          <Box args={[0.25, 0.1, 0.01]} position={[0, 0, 0.13]}>
+            <meshStandardMaterial color="#ffffff" />
+          </Box>
+          {/* Chemical Name on Label */}
           <Text
-            position={[0, -0.25, 0]}
-            fontSize={0.05}
-            color="white"
+            position={[0, 0, 0.14]}
+            fontSize={0.04}
+            color="#2c3e50"
             anchorX="center"
+            anchorY="middle"
           >
             {indicator.short}
           </Text>
         </group>
       ))}
       
-      {/* Cabinet Label */}
+      {/* Shelf Label */}
       <Text
-        position={[7, 3, -6.2]}
+        position={[4.5, 2.2, -7]}
         fontSize={0.12}
-        color="#ecf0f1"
+        color="#e74c3c"
         anchorX="center"
+        rotation={[0, Math.PI/2, 0]}
       >
         INDICATORS
       </Text>
