@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import React, { useRef, useState, useEffect } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Text, Box, Cylinder, Sphere, OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 
@@ -110,29 +110,29 @@ function ChemistryLabScene() {
       <OrbitControls 
         enablePan={true}
         enableZoom={true}
-        maxPolarAngle={Math.PI / 2.1}
-        minPolarAngle={-Math.PI / 6}
-        maxDistance={8}
-        minDistance={1}
-        target={[0, 1.5, -1]}
+        maxPolarAngle={Math.PI / 2.0}
+        minPolarAngle={-Math.PI / 4}
+        maxDistance={12}
+        minDistance={2}
+        target={[0, 2, 0]}
         enableDamping={true}
-        dampingFactor={0.05}
+        dampingFactor={0.08}
         autoRotate={false}
       />
       
       {/* ROOM STRUCTURE - Immersive Scale */}
       {/* Floor */}
-      <Box args={[20, 0.1, 15]} position={[0, 0, 0]} receiveShadow>
+      <Box args={[24, 0.1, 18]} position={[0, 0, 0]} receiveShadow>
         <meshStandardMaterial color="#f0f0f0" />
       </Box>
       
       {/* Floor Pattern */}
-      {Array.from({ length: 10 }, (_, i) => 
-        Array.from({ length: 7 }, (_, j) => (
+      {Array.from({ length: 12 }, (_, i) => 
+        Array.from({ length: 9 }, (_, j) => (
           <Box 
             key={`${i}-${j}`}
             args={[1.8, 0.005, 1.8]} 
-            position={[-9 + i * 2, 0.055, -6 + j * 2]}
+            position={[-11 + i * 2, 0.055, -8 + j * 2]}
           >
             <meshStandardMaterial color={((i + j) % 2 === 0) ? "#ffffff" : "#f8f8f8"} />
           </Box>
@@ -140,35 +140,42 @@ function ChemistryLabScene() {
       ).flat()}
       
       {/* Walls */}
-      <Box args={[0.2, 8, 15]} position={[-10, 4, 0]}>
+      <Box args={[0.2, 8, 18]} position={[-12, 4, 0]}>
         <meshStandardMaterial color="#f5f5f5" />
       </Box>
-      <Box args={[0.2, 8, 15]} position={[10, 4, 0]}>
+      <Box args={[0.2, 8, 18]} position={[12, 4, 0]}>
         <meshStandardMaterial color="#f5f5f5" />
       </Box>
-      <Box args={[20, 8, 0.2]} position={[0, 4, -7.5]}>
+      <Box args={[24, 8, 0.2]} position={[0, 4, -9]} castShadow>
         <meshStandardMaterial color="#f5f5f5" />
       </Box>
-      <Box args={[20, 8, 0.2]} position={[0, 4, 7.5]}>
+      {/* Entrance Wall with Door */}
+      <Box args={[10, 8, 0.2]} position={[-7, 4, 9]} castShadow>
+        <meshStandardMaterial color="#f5f5f5" />
+      </Box>
+      <Box args={[10, 8, 0.2]} position={[7, 4, 9]} castShadow>
+        <meshStandardMaterial color="#f5f5f5" />
+      </Box>
+      <Box args={[4, 2, 0.2]} position={[0, 6, 9]} castShadow>
         <meshStandardMaterial color="#f5f5f5" />
       </Box>
       
       {/* Windows with Frames */}
-      <Box args={[4, 3, 0.1]} position={[9.9, 4.5, 0]}>
+      <Box args={[4, 3, 0.1]} position={[11.9, 4.5, 0]}>
         <meshStandardMaterial color="#87ceeb" transparent opacity={0.6} />
       </Box>
-      <Box args={[4.2, 3.2, 0.05]} position={[9.95, 4.5, 0]}>
+      <Box args={[4.2, 3.2, 0.05]} position={[11.95, 4.5, 0]}>
         <meshStandardMaterial color="#8b4513" />
       </Box>
-      <Box args={[4, 3, 0.1]} position={[-9.9, 4.5, 0]}>
+      <Box args={[4, 3, 0.1]} position={[-11.9, 4.5, 0]}>
         <meshStandardMaterial color="#87ceeb" transparent opacity={0.6} />
       </Box>
-      <Box args={[4.2, 3.2, 0.05]} position={[-9.95, 4.5, 0]}>
+      <Box args={[4.2, 3.2, 0.05]} position={[-11.95, 4.5, 0]}>
         <meshStandardMaterial color="#8b4513" />
       </Box>
       
       {/* Ceiling */}
-      <Box args={[20, 0.1, 15]} position={[0, 8, 0]}>
+      <Box args={[24, 0.1, 18]} position={[0, 8, 0]}>
         <meshStandardMaterial color="#ffffff" />
       </Box>
       
@@ -283,8 +290,8 @@ function ChemistryLabScene() {
       
       {/* LAB TITLE ON BACK WALL */}
       <Text
-        position={[0, 6, -7]}
-        fontSize={0.6}
+        position={[0, 6.5, -8.5]}
+        fontSize={0.8}
         color="#2c3e50"
         anchorX="center"
         anchorY="middle"
@@ -850,8 +857,8 @@ function ChemistryLabScene() {
       
       {/* SAFETY NOTICE ON ENTRY WALL */}
       <Text
-        position={[0, 3, 7]}
-        fontSize={0.3}
+        position={[0, 3.5, 8.5]}
+        fontSize={0.4}
         color="#e74c3c"
         anchorX="center"
         anchorY="middle"
@@ -861,14 +868,106 @@ function ChemistryLabScene() {
       
       {/* Room Instructions */}
       <Text
-        position={[0, 2.2, 7]}
-        fontSize={0.15}
+        position={[0, 2.8, 8.5]}
+        fontSize={0.18}
         color="#2c3e50"
         anchorX="center"
         anchorY="middle"
       >
         Click on equipment to interact • Drag to look around
       </Text>
+      
+      {/* LABORATORY ENTRANCE DOOR */}
+      
+      {/* Door Frame */}
+      <Box args={[0.15, 5, 0.25]} position={[-1.1, 2.5, 8.9]} castShadow>
+        <meshStandardMaterial color="#8b4513" />
+      </Box>
+      <Box args={[0.15, 5, 0.25]} position={[1.1, 2.5, 8.9]} castShadow>
+        <meshStandardMaterial color="#8b4513" />
+      </Box>
+      <Box args={[2.2, 0.15, 0.25]} position={[0, 4.85, 8.9]} castShadow>
+        <meshStandardMaterial color="#8b4513" />
+      </Box>
+      
+      {/* Door Panels */}
+      <Box args={[0.9, 4.7, 0.1]} position={[-0.5, 2.35, 8.95]} castShadow>
+        <meshStandardMaterial color="#d4c5a7" roughness={0.7} />
+      </Box>
+      <Box args={[0.9, 4.7, 0.1]} position={[0.5, 2.35, 8.95]} castShadow>
+        <meshStandardMaterial color="#d4c5a7" roughness={0.7} />
+      </Box>
+      
+      {/* Door Panel Details */}
+      <Box args={[0.7, 2, 0.05]} position={[-0.5, 3.2, 8.98]} castShadow>
+        <meshStandardMaterial color="#c4b59a" />
+      </Box>
+      <Box args={[0.7, 2, 0.05]} position={[-0.5, 1.2, 8.98]} castShadow>
+        <meshStandardMaterial color="#c4b59a" />
+      </Box>
+      <Box args={[0.7, 2, 0.05]} position={[0.5, 3.2, 8.98]} castShadow>
+        <meshStandardMaterial color="#c4b59a" />
+      </Box>
+      <Box args={[0.7, 2, 0.05]} position={[0.5, 1.2, 8.98]} castShadow>
+        <meshStandardMaterial color="#c4b59a" />
+      </Box>
+      
+      {/* Door Handles */}
+      <Cylinder args={[0.03, 0.03, 0.15]} position={[-0.8, 2.3, 9.0]} rotation={[0, 0, Math.PI/2]}>
+        <meshStandardMaterial color="#c9b037" metalness={0.8} roughness={0.2} />
+      </Cylinder>
+      <Cylinder args={[0.03, 0.03, 0.15]} position={[0.8, 2.3, 9.0]} rotation={[0, 0, Math.PI/2]}>
+        <meshStandardMaterial color="#c9b037" metalness={0.8} roughness={0.2} />
+      </Cylinder>
+      
+      {/* Door Window (Safety Glass) */}
+      <Box args={[1.6, 1.2, 0.05]} position={[0, 3.8, 8.98]}>
+        <meshStandardMaterial color="#87ceeb" transparent opacity={0.7} />
+      </Box>
+      <Box args={[1.65, 1.25, 0.03]} position={[0, 3.8, 8.97]}>
+        <meshStandardMaterial color="#8b4513" />
+      </Box>
+      
+      {/* Door Window Grid (Safety Feature) */}
+      <Box args={[0.03, 1.2, 0.02]} position={[0, 3.8, 8.99]}>
+        <meshStandardMaterial color="#2c3e50" />
+      </Box>
+      <Box args={[1.6, 0.03, 0.02]} position={[0, 3.8, 8.99]}>
+        <meshStandardMaterial color="#2c3e50" />
+      </Box>
+      
+      {/* Laboratory Door Sign */}
+      <Box args={[1.8, 0.3, 0.05]} position={[0, 1.5, 8.98]}>
+        <meshStandardMaterial color="#e74c3c" />
+      </Box>
+      <Text
+        position={[0, 1.52, 9.01]}
+        fontSize={0.12}
+        color="#ffffff"
+        anchorX="center"
+        anchorY="middle"
+      >
+        CHEMISTRY LAB
+      </Text>
+      
+      {/* Safety Warning Sign */}
+      <Box args={[1.5, 0.2, 0.03]} position={[0, 1.1, 8.98]}>
+        <meshStandardMaterial color="#f39c12" />
+      </Box>
+      <Text
+        position={[0, 1.12, 9.0]}
+        fontSize={0.08}
+        color="#2c3e50"
+        anchorX="center"
+        anchorY="middle"
+      >
+        ⚠️ SAFETY EQUIPMENT REQUIRED
+      </Text>
+      
+      {/* Door Threshold */}
+      <Box args={[2.4, 0.05, 0.3]} position={[0, 0.025, 8.85]}>
+        <meshStandardMaterial color="#7f8c8d" />
+      </Box>
     </>
   )
 }
@@ -882,7 +981,7 @@ function ChemistryLab({ onBack }) {
       overflow: 'hidden'
     }}>
       <Canvas 
-        camera={{ position: [0, 1.7, 2], fov: 90 }}
+        camera={{ position: [0, 3, 6], fov: 75 }}
         aria-label="Virtual Chemistry Laboratory"
         role="application"
         shadows
