@@ -91,6 +91,23 @@ function LabEquipment({ position, type, onClick, isSelected }) {
   )
 }
 
+// Camera initialization component
+function CameraController() {
+  const { camera, gl } = useThree()
+  
+  useEffect(() => {
+    // Set camera position immediately on mount
+    camera.position.set(0, 4, 8)
+    camera.lookAt(0, 2, 0)
+    camera.updateProjectionMatrix()
+    
+    // Force a render to apply changes immediately
+    gl.render()
+  }, [camera, gl])
+  
+  return null
+}
+
 function ChemistryLabScene() {
   const [selectedEquipment, setSelectedEquipment] = useState(null)
 
