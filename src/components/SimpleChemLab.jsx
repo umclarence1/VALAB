@@ -679,7 +679,7 @@ function ChemistryLabScene() {
       {/* Laboratory Apparatus on Shelves */}
       
       {/* Bunsen Burners on Bottom Shelf */}
-      <group position={[8.3, 1.0, -1]}>
+      <group position={[8.3, 0.95, -1]}>
         <Cylinder args={[0.08, 0.1, 0.15]} position={[0, 0.075, 0]}>
           <meshStandardMaterial color="#34495e" />
         </Cylinder>
@@ -691,7 +691,7 @@ function ChemistryLabScene() {
         </Text>
       </group>
       
-      <group position={[8.3, 1.0, 1]}>
+      <group position={[8.3, 0.95, 1]}>
         <Cylinder args={[0.08, 0.1, 0.15]} position={[0, 0.075, 0]}>
           <meshStandardMaterial color="#34495e" />
         </Cylinder>
@@ -704,7 +704,7 @@ function ChemistryLabScene() {
       </group>
       
       {/* Conical Flasks on Second Shelf */}
-      <group position={[8.3, 2.5, -1]}>
+      <group position={[8.3, 2.38, -1]}>
         <Sphere args={[0.12]} position={[0, 0.08, 0]}>
           <meshStandardMaterial color="#87ceeb" transparent opacity={0.8} />
         </Sphere>
@@ -716,7 +716,7 @@ function ChemistryLabScene() {
         </Text>
       </group>
       
-      <group position={[8.3, 2.5, 1]}>
+      <group position={[8.3, 2.38, 1]}>
         <Sphere args={[0.12]} position={[0, 0.08, 0]}>
           <meshStandardMaterial color="#87ceeb" transparent opacity={0.8} />
         </Sphere>
@@ -729,7 +729,7 @@ function ChemistryLabScene() {
       </group>
       
       {/* Beakers on Third Shelf */}
-      <group position={[8.3, 4.0, -1]}>
+      <group position={[8.3, 3.88, -1]}>
         <Cylinder args={[0.12, 0.15, 0.25]} position={[0, 0.125, 0]}>
           <meshStandardMaterial color="#87ceeb" transparent opacity={0.8} />
         </Cylinder>
@@ -738,7 +738,7 @@ function ChemistryLabScene() {
         </Text>
       </group>
       
-      <group position={[8.3, 4.0, 1]}>
+      <group position={[8.3, 3.88, 1]}>
         <Cylinder args={[0.12, 0.15, 0.25]} position={[0, 0.125, 0]}>
           <meshStandardMaterial color="#87ceeb" transparent opacity={0.8} />
         </Cylinder>
@@ -748,7 +748,7 @@ function ChemistryLabScene() {
       </group>
       
       {/* Funnels on Top Shelf */}
-      <group position={[8.3, 5.5, -1]}>
+      <group position={[8.3, 5.38, -1]}>
         <Cylinder args={[0.1, 0.02, 0.15]} position={[0, 0.075, 0]}>
           <meshStandardMaterial color="#ffffff" transparent opacity={0.9} />
         </Cylinder>
@@ -760,7 +760,7 @@ function ChemistryLabScene() {
         </Text>
       </group>
       
-      <group position={[8.3, 5.5, 1]}>
+      <group position={[8.3, 5.38, 1]}>
         <Cylinder args={[0.1, 0.02, 0.15]} position={[0, 0.075, 0]}>
           <meshStandardMaterial color="#ffffff" transparent opacity={0.9} />
         </Cylinder>
@@ -769,6 +769,44 @@ function ChemistryLabScene() {
         </Cylinder>
         <Text position={[0, -0.15, 0]} fontSize={0.04} color="white" anchorX="center">
           Funnel
+        </Text>
+      </group>
+      
+      {/* Additional Specialized Equipment */}
+      
+      {/* Petri Dishes on Second Shelf */}
+      <group position={[8.3, 2.38, 3]}>
+        <Cylinder args={[0.08, 0.08, 0.02]} position={[0, 0.01, 0]}>
+          <meshStandardMaterial color="#ffffff" transparent opacity={0.9} />
+        </Cylinder>
+        <Cylinder args={[0.075, 0.075, 0.015]} position={[0, 0.025, 0]}>
+          <meshStandardMaterial color="#ffffff" transparent opacity={0.9} />
+        </Cylinder>
+        <Text position={[0, -0.05, 0]} fontSize={0.03} color="white" anchorX="center">
+          Petri
+        </Text>
+      </group>
+      
+      {/* Thermometer on Third Shelf */}
+      <group position={[8.3, 3.88, 3]}>
+        <Cylinder args={[0.01, 0.01, 0.3]} position={[0, 0.15, 0]}>
+          <meshStandardMaterial color="#e74c3c" />
+        </Cylinder>
+        <Sphere args={[0.02]} position={[0, -0.02, 0]}>
+          <meshStandardMaterial color="#e74c3c" />
+        </Sphere>
+        <Text position={[0, -0.08, 0]} fontSize={0.03} color="white" anchorX="center">
+          Thermometer
+        </Text>
+      </group>
+      
+      {/* Watch Glass on Top Shelf */}
+      <group position={[8.3, 5.38, 3]}>
+        <Sphere args={[0.08]} position={[0, 0.04, 0]} scale={[1, 0.3, 1]}>
+          <meshStandardMaterial color="#87ceeb" transparent opacity={0.8} />
+        </Sphere>
+        <Text position={[0, -0.05, 0]} fontSize={0.03} color="white" anchorX="center">
+          Watch Glass
         </Text>
       </group>
       
