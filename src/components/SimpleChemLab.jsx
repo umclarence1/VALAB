@@ -1005,6 +1005,24 @@ function ChemistryLabScene() {
 }
 
 function ChemistryLab({ onBack }) {
+  useEffect(() => {
+    // Prevent body scroll when in lab
+    document.body.style.overflow = 'hidden'
+    
+    // Ensure proper viewport sizing
+    const handleResize = () => {
+      // Trigger canvas resize if needed
+      window.dispatchEvent(new Event('resize'))
+    }
+    
+    // Initial resize after mount
+    setTimeout(handleResize, 100)
+    
+    return () => {
+      document.body.style.overflow = 'auto'
+    }
+  }, [])
+
   return (
     <div className="chemistry-lab" style={{ 
       width: '100vw', 
