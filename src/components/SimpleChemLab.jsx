@@ -1116,6 +1116,109 @@ function ChemistryLabScene({ selectedChemicals, setSelectedChemicals, onContextS
 }
 
 function ChemistryLab({ onBack }) {
+  // Setup flow states
+  const [setupVisible, setSetupVisible] = useState(true)
+  const [setupStep, setSetupStep] = useState(1) // 1: experiment, 2: tools, 3: question, 4: chemicals
+  const [selectedExperiment, setSelectedExperiment] = useState(null)
+  const [generatedQuestions, setGeneratedQuestions] = useState([])
+  const [chosenQuestion, setChosenQuestion] = useState(null)
+  const [setupChemicals, setSetupChemicals] = useState([])
+  const [requiredTools, setRequiredTools] = useState([])
+
+  // Tools required per experiment
+  const toolsForExperiment = {
+    'Simple titration': ['Burette (50 mL)', 'Pipette (25 mL)', 'Conical flask (Erlenmeyer)', 'Phenolphthalein indicator', 'Standard NaOH solution', 'White tile'],
+    'Back titration': ['Analytical balance', 'Volumetric flask (250 mL)', 'Pipette (25 mL)', 'Excess HCl', 'Indicator solution', 'Burette'],
+    'Redox titration': ['Burette (50 mL)', 'Pipette (25 mL)', 'Conical flask', 'KMnO₄ solution', 'Reducing agent', 'Stirrer'],
+    'Distillation': ['Round-bottom flask (500 mL)', 'Liebig condenser', 'Heating mantle', 'Receiving flask', 'Thermometer (0-110°C)', 'Adapter joints']
+  }
+
+  // Lab experiments list
+  const experiments = ['Simple titration', 'Back titration', 'Redox titration', 'Distillation']
+
+  // Generate questions for experiment
+  const generateQuestionsFor = (experiment) => {
+    const pool = {
+      'Simple titration': [
+        'Determine the concentration of an unknown monoprotic acid using NaOH titration (3 significant figures).',
+        'Calculate molarity of HCl using titration with standardized NaOH solution.'
+      ],
+      'Back titration': [
+        'Find the amount of CaCO₃ in an impure sample using back titration with excess HCl.',
+        'Determine concentration of a weak base by back titration using standardized HCl.'
+      ],
+      'Redox titration': [
+        'Determine the oxidizing agent concentration using KMnO₄ titration (show balanced equation).',
+        'Calculate iron(II) concentration by titration with standardized potassium dichromate.'
+      ],
+      'Distillation': [
+        'Separate ethanol from a 50:50 ethanol-water mixture and calculate yield percentage.',
+        'Purify a volatile organic solvent using simple distillation and record boiling point.'
+      ]
+    }
+    const opts = (pool[experiment] || []).slice()
+    for (let i = opts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[opts[i], opts[j]] = [opts[j], opts[i]]
+    }
+    return opts
+  }
+
+  // Start experiment flow
+  const startExperiment = (exp) => {
+    setSelectedExperiment(exp)
+    setChosenQuestion(null)
+    setRequiredTools(toolsForExperiment[exp] || [])
+    setSetupStep(2)
+  }
+
+  // Acknowledge tools and continue
+  const acknowledgeToolsAndContinue = () => {
+    if (!selectedExperiment) return
+    setGeneratedQuestions(generateQuestionsFor(selectedExperiment))
+    setSetupStep(3)
+  }
+
+  // Toggle chemical selection
+  const toggleChemicalSelection = (chemId) => {
+    const exists = setupChemicals.find(c => c.id === chemId)
+    if (exists) {
+      setSetupChemicals(prev => prev.filter(c => c.id !== chemId))
+    } else {
+      setSetupChemicals(prev => [...prev, { id: chemId, volume: '' }])
+    }
+  }
+
+  // Set chemical volume
+  const setChemicalVolume = (chemId, value) => {
+    setSetupChemicals(prev => prev.map(c => c.id === chemId ? { ...c, volume: value } : c))
+  }
+
+  // Check if can enter mixing workspace
+  const canEnterWorkspace = () => {
+    if (!chosenQuestion) return false
+    if (setupChemicals.length === 0) return false
+    return setupChemicals.every(c => c.volume && !isNaN(Number(c.volume)) && Number(c.volume) > 0)
+  }
+
+  // Enter mixing workspace with selected chemicals
+  const enterMixingWorkspace = () => {
+    if (!canEnterWorkspace()) return
+    const ids = setupChemicals.map(c => c.id)
+    setSelectedChemicals(ids)
+    setSetupVisible(false)
+    setShowMixingWorkspace(true)
+  }
+
+  // Skip setup and go directly
+  const skipAndEnter = () => {
+    const ids = setupChemicals.length ? setupChemicals.map(c => c.id) : selectedChemicals
+    setSelectedChemicals(ids)
+    setSetupVisible(false)
+    setShowMixingWorkspace(true)
+  }
+
+  // Original lab states
   const [selectedChemicals, setSelectedChemicals] = useState([])
   const [mixingResult, setMixingResult] = useState(null)
   const [showMixingPanel, setShowMixingPanel] = useState(false)
@@ -1246,7 +1349,7 @@ function ChemistryLab({ onBack }) {
     return (
       <MixingWorkspace
         selectedChemicals={selectedChemicals}
-        onBack={backToLab}
+        onBack={() => { setShowMixingWorkspace(false) }}
         onMixComplete={(result) => {
           setMixingResult(result)
           setShowMixingPanel(true)
@@ -1265,6 +1368,160 @@ function ChemistryLab({ onBack }) {
       overflow: 'hidden',
       background: '#000'
     }}>
+      {/* Setup Overlay */}
+      {setupVisible && (
+        <div role="dialog" aria-modal="true" aria-label="Chemistry lab setup" style={{
+          position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'linear-gradient(135deg, rgba(10,20,40,0.9), rgba(20,40,80,0.9))', zIndex: 3000, padding: '24px'
+        }}>
+          <div style={{ 
+            width: '900px', maxWidth: '96vw', background: 'linear-gradient(135deg, #0f1720 0%, #1a2a3a 100%)', 
+            borderRadius: 16, padding: 32, color: 'white', boxShadow: '0 20px 60px rgba(0,255,136,0.2), 0 0 40px rgba(52,152,219,0.1)',
+            border: '2px solid rgba(0,255,136,0.3)'
+          }}>
+            {/* Header */}
+            <div style={{ marginBottom: 24, borderBottom: '2px solid rgba(0,255,136,0.2)', paddingBottom: 16 }}>
+              <h2 style={{ marginTop: 0, color: '#00ff88', fontSize: 28, fontWeight: 'bold' }}>🧪 Chemistry Lab Setup</h2>
+              <div style={{ color: '#9aa7b4', fontSize: 14 }}>Step {setupStep} of 4 | {selectedExperiment ? selectedExperiment : 'Select Experiment'}</div>
+            </div>
+
+            {/* Step 1 - Experiment Selection */}
+            {setupStep === 1 && (
+              <div>
+                <p style={{ color: '#d1d5db', fontSize: 16, marginBottom: 16 }}>Choose an experiment type to begin:</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
+                  {experiments.map(exp => (
+                    <button
+                      key={exp}
+                      onClick={() => startExperiment(exp)}
+                      style={{
+                        padding: '14px 16px',
+                        background: 'linear-gradient(135deg, rgba(52,152,219,0.2), rgba(52,152,219,0.1))',
+                        border: '2px solid rgba(52,152,219,0.4)',
+                        color: 'white',
+                        borderRadius: 10,
+                        cursor: 'pointer',
+                        fontSize: 14,
+                        fontWeight: '500',
+                        transition: 'all 0.3s ease',
+                        textAlign: 'left'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.background = 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.1))'
+                        e.target.style.borderColor = 'rgba(0,255,136,0.6)'
+                        e.target.style.boxShadow = '0 0 20px rgba(0,255,136,0.2)'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.background = 'linear-gradient(135deg, rgba(52,152,219,0.2), rgba(52,152,219,0.1))'
+                        e.target.style.borderColor = 'rgba(52,152,219,0.4)'
+                        e.target.style.boxShadow = 'none'
+                      }}
+                    >
+                      {exp === 'Simple titration' && '🧫'}
+                      {exp === 'Back titration' && '🔄'}
+                      {exp === 'Redox titration' && '⚡'}
+                      {exp === 'Distillation' && '🔥'}
+                      {' ' + exp}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Step 2 - Required Tools */}
+            {setupStep === 2 && (
+              <div>
+                <p style={{ color: '#d1d5db', fontSize: 16, marginBottom: 12 }}><strong>{selectedExperiment}</strong> requires these tools:</p>
+                <div style={{ background: 'rgba(0,0,0,0.3)', padding: 16, borderRadius: 10, marginBottom: 20 }}>
+                  <ul style={{ margin: 0, padding: '0 0 0 24px', color: '#bdc3c7', lineHeight: '1.8' }}>
+                    {requiredTools.map((tool, i) => (
+                      <li key={i} style={{ marginBottom: 8, fontSize: 14 }}>✓ {tool}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div style={{ display: 'flex', gap: 12, justifyContent: 'space-between' }}>
+                  <button onClick={() => { setSetupStep(1); setSelectedExperiment(null) }} style={{ background: 'transparent', color: '#9aa7b4', border: 'none', cursor: 'pointer', fontSize: 14, padding: '8px 12px' }}>← Back</button>
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <button onClick={() => acknowledgeToolsAndContinue()} style={{ padding: '10px 20px', borderRadius: 8, background: 'linear-gradient(135deg, #00ff88, #00cc6a)', color: '#000', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
+                      I have these tools →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3 - Question Selection */}
+            {setupStep === 3 && (
+              <div>
+                <p style={{ color: '#d1d5db', fontSize: 16, marginBottom: 12 }}>Select your experiment question:</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20, maxHeight: '280px', overflowY: 'auto', paddingRight: 8 }}>
+                  {generatedQuestions.map((q, i) => (
+                    <label key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: 12, background: 'rgba(52,152,219,0.1)', borderRadius: 8, border: '2px solid rgba(52,152,219,0.3)', cursor: 'pointer', transition: 'all 0.3s ease' }} onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(0,255,136,0.1)'; e.currentTarget.style.borderColor = 'rgba(0,255,136,0.4)' }} onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(52,152,219,0.1)'; e.currentTarget.style.borderColor = 'rgba(52,152,219,0.3)' }}>
+                      <input
+                        type="radio"
+                        name="setup-question"
+                        checked={chosenQuestion === q}
+                        onChange={() => setChosenQuestion(q)}
+                        style={{ width: 18, height: 18, marginTop: 2, flexShrink: 0 }}
+                      />
+                      <span style={{ color: '#e6eef6', fontSize: 14, lineHeight: '1.5' }}>{q}</span>
+                    </label>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: 12, justifyContent: 'space-between' }}>
+                  <button onClick={() => setSetupStep(2)} style={{ background: 'transparent', color: '#9aa7b4', border: 'none', cursor: 'pointer', fontSize: 14, padding: '8px 12px' }}>← Back</button>
+                  <button disabled={!chosenQuestion} onClick={() => setSetupStep(4)} style={{ padding: '10px 20px', borderRadius: 8, background: chosenQuestion ? 'linear-gradient(135deg, #2b6cb0, #1e4d7b)' : 'rgba(100,100,100,0.3)', color: 'white', border: 'none', cursor: chosenQuestion ? 'pointer' : 'not-allowed', fontWeight: 'bold' }}>
+                    Continue to Chemicals →
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 4 - Chemical Selection */}
+            {setupStep === 4 && (
+              <div>
+                <p style={{ color: '#d1d5db', fontSize: 16, marginBottom: 12 }}>Select chemicals and specify volumes (mL):</p>
+                <div style={{ maxHeight: 300, overflowY: 'auto', paddingRight: 8, marginBottom: 20, background: 'rgba(0,0,0,0.2)', padding: 12, borderRadius: 10 }}>
+                  {Object.keys(chemicalData.chemicals).slice(0, 20).map((chemId) => {
+                    const chem = chemicalData.chemicals[chemId]
+                    const selected = setupChemicals.find(c => c.id === chemId)
+                    return (
+                      <div key={chemId} style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                        <label style={{ flex: 1, display: 'flex', gap: 12, alignItems: 'center', cursor: 'pointer' }}>
+                          <input type="checkbox" checked={!!selected} onChange={() => toggleChemicalSelection(chemId)} style={{ width: 18, height: 18 }} />
+                          <div>
+                            <div style={{ color: '#e6eef6', fontSize: 13, fontWeight: '500' }}>{chem.name}</div>
+                            <div style={{ color: '#9aa7b4', fontSize: 11 }}>{chemId}</div>
+                          </div>
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          placeholder="mL"
+                          value={selected?.volume || ''}
+                          onChange={(e) => setChemicalVolume(chemId, e.target.value)}
+                          disabled={!selected}
+                          style={{ width: 70, padding: '6px 8px', borderRadius: 6, border: '1px solid rgba(0,255,136,0.3)', background: selected ? 'rgba(0,255,136,0.1)' : 'rgba(0,0,0,0.3)', color: 'white' }}
+                        />
+                      </div>
+                    )
+                  })}
+                </div>
+                <div style={{ display: 'flex', gap: 12, justifyContent: 'space-between' }}>
+                  <button onClick={() => setSetupStep(3)} style={{ background: 'transparent', color: '#9aa7b4', border: 'none', cursor: 'pointer', fontSize: 14, padding: '8px 12px' }}>← Back</button>
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <button onClick={skipAndEnter} style={{ padding: '10px 16px', borderRadius: 8, background: 'rgba(100,100,100,0.3)', color: 'white', border: '1px solid rgba(100,100,100,0.5)', cursor: 'pointer' }}>Skip</button>
+                    <button disabled={!canEnterWorkspace()} onClick={enterMixingWorkspace} style={{ padding: '10px 20px', borderRadius: 8, background: canEnterWorkspace() ? 'linear-gradient(135deg, #16a34a, #0f7a38)' : 'rgba(100,100,100,0.3)', color: 'white', border: 'none', cursor: canEnterWorkspace() ? 'pointer' : 'not-allowed', fontWeight: 'bold' }}>
+                      Enter Mixing Workspace 🧬
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <Canvas 
         camera={{ 
           position: [0, 2.5, 4], 
