@@ -134,6 +134,12 @@ function ChemistryLabScene() {
         maxDistance={15}
         minDistance={2}
         target={[0, 1, 0]}
+        enableRotate={true}
+        autoRotate={false}
+        autoRotateSpeed={2.0}
+        rotateSpeed={0.5}
+        enableDamping={true}
+        dampingFactor={0.05}
       />
       
       {/* Room Structure - Simple and Clear */}

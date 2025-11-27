@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
-import { Text, Box, Cylinder, Sphere, OrbitControls } from '@react-three/drei'
+import { Text, Box, Cylinder, Sphere } from '@react-three/drei'
 import * as THREE from 'three'
 import chemicalData from '../data/chemicalMixtures.json'
 
@@ -8,9 +8,15 @@ import chemicalData from '../data/chemicalMixtures.json'
 const useDropper = (chemicalId) => {
   const chemical = chemicalData.chemicals[chemicalId]
   if (!chemical) return false
-  // Indicators and small-volume chemicals use droppers
-  return chemical.hazard === 'indicator' || 
-         ['Phenolphthalein', 'MethylOrange', 'UniversalIndicator', 'Litmus'].includes(chemicalId)
+  // Only liquid indicators use droppers (excluding litmus paper and test strips)
+  return chemical.hazard === 'indicator' && 
+         chemical.state === 'liquid' &&
+         !['Litmus'].includes(chemicalId)
+}
+
+// Helper function to determine if chemical is litmus paper
+const isLitmusPaper = (chemicalId) => {
+  return chemicalId === 'Litmus'
 }
 
 // Static Camera Component
@@ -210,6 +216,66 @@ function Dropper({ chemicalId, position, isDraggable, onPointerDown, onPointerMo
       {/* Hover glow */}
       {isHovered && isDraggable && (
         <Sphere args={[0.25]} position={[0, 0.5, 0]}>
+          <meshBasicMaterial color="#00ff88" transparent opacity={0.2} />
+        </Sphere>
+      )}
+    </group>
+  )
+}
+
+// Litmus Paper Component - for dipping into solutions
+function LitmusPaper({ chemicalId, position, isDraggable, onPointerDown, onPointerMove, onPointerUp, rotation }) {
+  const [isHovered, setIsHovered] = useState(false)
+  const groupRef = useRef()
+  
+  const chemical = chemicalData.chemicals[chemicalId]
+  if (!chemical) return null
+
+  return (
+    <group 
+      ref={groupRef}
+      position={position}
+      rotation={rotation || [0, 0, 0]}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerOver={() => { 
+        setIsHovered(true)
+        if (isDraggable) document.body.style.cursor = 'grab'
+      }}
+      onPointerOut={() => { 
+        setIsHovered(false)
+        document.body.style.cursor = 'auto'
+      }}
+    >
+      {/* Paper Strip Holder */}
+      <Box args={[0.08, 0.15, 0.05]} position={[0, 0.85, 0]}>
+        <meshStandardMaterial color="#555555" />
+      </Box>
+
+      {/* Litmus Paper Strip */}
+      <Box args={[0.06, 0.8, 0.01]} position={[0, 0.4, 0]}>
+        <meshStandardMaterial 
+          color={chemical.color}
+          roughness={0.9}
+        />
+      </Box>
+
+      {/* Label */}
+      <Text
+        position={[0, 0, 0.02]}
+        fontSize={0.05}
+        color="#ffffff"
+        anchorX="center"
+        anchorY="middle"
+        rotation={[0, 0, 0]}
+      >
+        Litmus
+      </Text>
+
+      {/* Hover glow */}
+      {isHovered && isDraggable && (
+        <Sphere args={[0.15]} position={[0, 0.5, 0]}>
           <meshBasicMaterial color="#00ff88" transparent opacity={0.2} />
         </Sphere>
       )}
@@ -422,11 +488,33 @@ function MixingWorkspaceScene({ selectedChemicals, onMixComplete }) {
       const heightDiff = sourcePos.y - beakerPos.y
       const currentScale = liquidScales[sourceId] || 1
 
+      // Check if it's litmus paper (no pouring, just dipping)
+      const isLitmus = isLitmusPaper(sourceId)
+      
       // Check if flask is in pouring position AND has liquid remaining
       const isInPouringPosition = distance < 1.0 && heightDiff > 0.2 && currentScale > 0.05
       const isDropper = useDropper(sourceId)
 
       if (isInPouringPosition && draggedFlask === sourceId) {
+        // For litmus paper, just tilt slightly but don't pour
+        if (isLitmus) {
+          // Tilt litmus paper to dip into beaker
+          setFlaskRotations(prev => {
+            const currentRotation = prev[sourceId] || [0, 0, 0]
+            const targetZ = -Math.PI / 6 // Smaller tilt for dipping
+            const currentZ = currentRotation[2]
+            const smoothZ = currentZ + (targetZ - currentZ) * 0.15
+            
+            return {
+              ...prev,
+              [sourceId]: [0, 0, smoothZ]
+            }
+          })
+          // Litmus paper doesn't add liquid to beaker, just tests pH
+          // Color change logic could be added here based on beaker pH
+          return
+        }
+        
         // Smoothly tilt the container for pouring/dropping
         setFlaskRotations(prev => {
           const currentRotation = prev[sourceId] || [0, 0, 0]
@@ -668,16 +756,7 @@ function MixingWorkspaceScene({ selectedChemicals, onMixComplete }) {
 
   return (
     <>
-      {/* Orbit Controls for circular movement */}
-      <OrbitControls
-        enablePan={true}
-        enableZoom={true}
-        enableRotate={true}
-        minDistance={2}
-        maxDistance={8}
-        maxPolarAngle={Math.PI / 2}
-        target={[0, 1, 0]}
-      />
+      <StaticCamera />
 
       {/* Lighting */}
       <ambientLight intensity={0.6} />
@@ -736,17 +815,33 @@ function MixingWorkspaceScene({ selectedChemicals, onMixComplete }) {
         showPrecipitate={showPrecipitate}
       />
 
-      {/* Flasks and Droppers */}
+      {/* Flasks, Droppers, and Litmus Paper */}
       {selectedChemicals.map((id) => {
         const position = flaskPositions[id]
         const rotation = flaskRotations[id]
         const liquidScale = liquidScales[id] || 1
         const isDropperChem = useDropper(id)
+        const isLitmus = isLitmusPaper(id)
 
         if (!position) return null
 
-        // Render Dropper for indicators, Flask for others
-        if (isDropperChem) {
+        // Render Litmus Paper for litmus
+        if (isLitmus) {
+          return (
+            <LitmusPaper
+              key={id}
+              chemicalId={id}
+              position={[position.x, position.y, position.z]}
+              rotation={rotation}
+              isDraggable={true}
+              onPointerDown={handlePointerDown(id)}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+            />
+          )
+        }
+        // Render Dropper for liquid indicators
+        else if (isDropperChem) {
           return (
             <Dropper
               key={id}
@@ -761,7 +856,9 @@ function MixingWorkspaceScene({ selectedChemicals, onMixComplete }) {
               onPointerUp={handlePointerUp}
             />
           )
-        } else {
+        }
+        // Render Flask for all other chemicals
+        else {
           return (
             <Flask
               key={id}
@@ -778,37 +875,17 @@ function MixingWorkspaceScene({ selectedChemicals, onMixComplete }) {
         }
       })}
 
-      {/* Dropper for Indicator Chemicals */}
-      {selectedChemicals.map((id) => {
-        const position = flaskPositions[id]
-        const rotation = flaskRotations[id]
-        const liquidScale = liquidScales[id] || 1
-        const isSqueezed = false // Determine squeezed state based on interaction
-
-        if (!position || !useDropper(id)) return null
-
-        return (
-          <Dropper
-            key={id}
-            chemicalId={id}
-            position={[position.x, position.y, position.z]}
-            rotation={rotation}
-            liquidScale={liquidScale}
-            isDraggable={true}
-            onPointerDown={handlePointerDown(id)}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            isSqueezed={isSqueezed}
-          />
-        )
-      })}
-
       {/* Container Labels */}
       {selectedChemicals.map((id) => {
         const pos = flaskPositions[id]
         if (!pos) return null
         const scale = liquidScales[id] || 1
         const isDropperChem = useDropper(id)
+        const isLitmus = isLitmusPaper(id)
+        let containerType = 'Flask'
+        if (isLitmus) containerType = 'Paper'
+        else if (isDropperChem) containerType = 'Dropper'
+        
         return (
           <Text 
             key={`label-${id}`}
@@ -816,7 +893,7 @@ function MixingWorkspaceScene({ selectedChemicals, onMixComplete }) {
             fontSize={0.08} 
             color="#3498db"
           >
-            {chemicalData.chemicals[id]?.name} {isDropperChem ? '(Dropper' : '(Flask'} - {Math.round(scale * 100)}%)
+            {chemicalData.chemicals[id]?.name} ({containerType}{isLitmus ? '' : ` - ${Math.round(scale * 100)}%`})
           </Text>
         )
       })}
@@ -930,23 +1007,17 @@ export default function MixingWorkspace({ selectedChemicals = [], onBack, onMixC
         </h3>
         <div style={{ fontSize: '14px', lineHeight: '1.8' }}>
           <p style={{ margin: '0 0 10px 0' }}>
-            <strong>Camera Controls:</strong>
-          </p>
-          <ul style={{ margin: '0 0 15px 0', padding: '0 0 0 20px' }}>
-            <li style={{ color: '#f39c12' }}>Left click + drag to rotate</li>
-            <li style={{ color: '#f39c12' }}>Right click + drag to pan</li>
-            <li style={{ color: '#f39c12' }}>Scroll to zoom in/out</li>
-          </ul>
-          <p style={{ margin: '0 0 10px 0' }}>
             <strong>Selected Chemicals:</strong>
           </p>
           <ul style={{ margin: '0 0 15px 0', padding: '0 0 0 20px' }}>
             {selectedChemicals.map(id => {
               const isDropperChem = useDropper(id)
+              const isLitmus = isLitmusPaper(id)
               return (
                 <li key={id} style={{ color: '#3498db' }}>
                   {chemicalData.chemicals[id]?.name}
                   {isDropperChem && <span style={{ color: '#f39c12' }}> 💧 (Dropper)</span>}
+                  {isLitmus && <span style={{ color: '#8a2be2' }}> 📄 (Paper)</span>}
                 </li>
               )
             })}
@@ -956,6 +1027,9 @@ export default function MixingWorkspace({ selectedChemicals = [], onBack, onMixC
           </p>
           <p style={{ margin: '0 0 8px 0' }}>
             • <strong>Droppers:</strong> Add drops carefully
+          </p>
+          <p style={{ margin: '0 0 8px 0' }}>
+            • <strong>Litmus Paper:</strong> Dip to test pH
           </p>
           <p style={{ margin: '0 0 8px 0' }}>
             • <strong>Move away</strong> to stop pouring

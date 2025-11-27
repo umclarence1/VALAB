@@ -99,11 +99,12 @@
       "hazard": "indicator"
     },
     "Litmus": {
-      "name": "Litmus",
+      "name": "Litmus Paper",
       "color": "#8a2be2",
-      "state": "liquid",
+      "state": "paper",
       "ph": 7,
-      "hazard": "indicator"
+      "hazard": "indicator",
+      "type": "test_strip"
     },
     "Acetone": {
       "name": "Acetone",
