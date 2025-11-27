@@ -1,0 +1,431 @@
+{
+  "chemicals": {
+    "HCl": {
+      "name": "Hydrochloric Acid",
+      "color": "#e74c3c",
+      "state": "liquid",
+      "ph": 1,
+      "hazard": "corrosive"
+    },
+    "H2SO4": {
+      "name": "Sulfuric Acid",
+      "color": "#8e44ad",
+      "state": "liquid",
+      "ph": 0,
+      "hazard": "corrosive"
+    },
+    "HNO3": {
+      "name": "Nitric Acid",
+      "color": "#f39c12",
+      "state": "liquid",
+      "ph": 1,
+      "hazard": "oxidizing"
+    },
+    "NaOH": {
+      "name": "Sodium Hydroxide",
+      "color": "#27ae60",
+      "state": "solid",
+      "ph": 14,
+      "hazard": "caustic"
+    },
+    "KOH": {
+      "name": "Potassium Hydroxide",
+      "color": "#2ecc71",
+      "state": "solid",
+      "ph": 13,
+      "hazard": "caustic"
+    },
+    "NH4OH": {
+      "name": "Ammonium Hydroxide",
+      "color": "#16a085",
+      "state": "liquid",
+      "ph": 11,
+      "hazard": "irritant"
+    },
+    "NaCl": {
+      "name": "Sodium Chloride",
+      "color": "#ffffff",
+      "state": "solid",
+      "ph": 7,
+      "hazard": "safe"
+    },
+    "CuSO4": {
+      "name": "Copper Sulfate",
+      "color": "#3498db",
+      "state": "solid",
+      "ph": 4,
+      "hazard": "irritant"
+    },
+    "FeCl3": {
+      "name": "Ferric Chloride",
+      "color": "#f39c12",
+      "state": "solid",
+      "ph": 2,
+      "hazard": "corrosive"
+    },
+    "AgNO3": {
+      "name": "Silver Nitrate",
+      "color": "#95a5a6",
+      "state": "solid",
+      "ph": 6,
+      "hazard": "oxidizing"
+    },
+    "BaCl2": {
+      "name": "Barium Chloride",
+      "color": "#ecf0f1",
+      "state": "solid",
+      "ph": 7,
+      "hazard": "toxic"
+    },
+    "Phenolphthalein": {
+      "name": "Phenolphthalein",
+      "color": "#ff69b4",
+      "state": "liquid",
+      "ph": 7,
+      "hazard": "indicator"
+    },
+    "MethylOrange": {
+      "name": "Methyl Orange",
+      "color": "#ff4500",
+      "state": "liquid",
+      "ph": 7,
+      "hazard": "indicator"
+    },
+    "UniversalIndicator": {
+      "name": "Universal Indicator",
+      "color": "#32cd32",
+      "state": "liquid",
+      "ph": 7,
+      "hazard": "indicator"
+    },
+    "Litmus": {
+      "name": "Litmus",
+      "color": "#8a2be2",
+      "state": "liquid",
+      "ph": 7,
+      "hazard": "indicator"
+    },
+    "Acetone": {
+      "name": "Acetone",
+      "color": "#f39c12",
+      "state": "liquid",
+      "ph": 7,
+      "hazard": "flammable"
+    },
+    "Ethanol": {
+      "name": "Ethanol",
+      "color": "#3498db",
+      "state": "liquid",
+      "ph": 7,
+      "hazard": "flammable"
+    },
+    "Methanol": {
+      "name": "Methanol",
+      "color": "#9b59b6",
+      "state": "liquid",
+      "ph": 7,
+      "hazard": "toxic"
+    },
+    "Hexane": {
+      "name": "Hexane",
+      "color": "#1abc9c",
+      "state": "liquid",
+      "ph": 7,
+      "hazard": "flammable"
+    }
+  },
+  "mixtures": [
+    {
+      "id": "acid_base_1",
+      "chemicals": ["HCl", "NaOH"],
+      "ratio": [1, 1],
+      "results": {
+        "colorChange": "#f8f9fa",
+        "effervescence": false,
+        "temperatureChange": "exothermic",
+        "precipitate": false,
+        "description": "Neutralization reaction forming salt and water",
+        "equation": "HCl + NaOH → NaCl + H₂O",
+        "observation": "Solution becomes warm and colorless"
+      }
+    },
+    {
+      "id": "indicator_acid_1",
+      "chemicals": ["HCl", "Phenolphthalein"],
+      "ratio": [10, 1],
+      "results": {
+        "colorChange": "#ffffff",
+        "effervescence": false,
+        "temperatureChange": "none",
+        "precipitate": false,
+        "description": "Phenolphthalein remains colorless in acidic solution",
+        "observation": "No color change - remains clear"
+      }
+    },
+    {
+      "id": "indicator_base_1",
+      "chemicals": ["NaOH", "Phenolphthalein"],
+      "ratio": [10, 1],
+      "results": {
+        "colorChange": "#ff1493",
+        "effervescence": false,
+        "temperatureChange": "none",
+        "precipitate": false,
+        "description": "Phenolphthalein turns pink in basic solution",
+        "observation": "Bright pink coloration appears"
+      }
+    },
+    {
+      "id": "copper_reaction_1",
+      "chemicals": ["CuSO4", "NaOH"],
+      "ratio": [1, 2],
+      "results": {
+        "colorChange": "#4169e1",
+        "effervescence": false,
+        "temperatureChange": "slight_exothermic",
+        "precipitate": true,
+        "description": "Formation of copper hydroxide precipitate",
+        "equation": "CuSO₄ + 2NaOH → Cu(OH)₂ + Na₂SO₄",
+        "observation": "Blue gelatinous precipitate forms"
+      }
+    },
+    {
+      "id": "silver_chloride",
+      "chemicals": ["AgNO3", "HCl"],
+      "ratio": [1, 1],
+      "results": {
+        "colorChange": "#ffffff",
+        "effervescence": false,
+        "temperatureChange": "none",
+        "precipitate": true,
+        "description": "Formation of white silver chloride precipitate",
+        "equation": "AgNO₃ + HCl → AgCl + HNO₃",
+        "observation": "White curdy precipitate immediately forms"
+      }
+    },
+    {
+      "id": "iron_test",
+      "chemicals": ["FeCl3", "NaOH"],
+      "ratio": [1, 3],
+      "results": {
+        "colorChange": "#a0522d",
+        "effervescence": false,
+        "temperatureChange": "exothermic",
+        "precipitate": true,
+        "description": "Formation of iron hydroxide precipitate",
+        "equation": "FeCl₃ + 3NaOH → Fe(OH)₃ + 3NaCl",
+        "observation": "Reddish-brown gelatinous precipitate forms"
+      }
+    },
+    {
+      "id": "acid_metal_reaction",
+      "chemicals": ["HCl", "CuSO4"],
+      "ratio": [2, 1],
+      "results": {
+        "colorChange": "#32cd32",
+        "effervescence": true,
+        "temperatureChange": "exothermic",
+        "precipitate": false,
+        "description": "Acid reacting with copper compound",
+        "observation": "Vigorous bubbling and color change to green"
+      }
+    },
+    {
+      "id": "barium_sulfate",
+      "chemicals": ["BaCl2", "H2SO4"],
+      "ratio": [1, 1],
+      "results": {
+        "colorChange": "#ffffff",
+        "effervescence": false,
+        "temperatureChange": "none",
+        "precipitate": true,
+        "description": "Formation of barium sulfate precipitate",
+        "equation": "BaCl₂ + H₂SO₄ → BaSO₄ + 2HCl",
+        "observation": "Dense white precipitate forms immediately"
+      }
+    },
+    {
+      "id": "methyl_orange_acid",
+      "chemicals": ["HCl", "MethylOrange"],
+      "ratio": [10, 1],
+      "results": {
+        "colorChange": "#ff0000",
+        "effervescence": false,
+        "temperatureChange": "none",
+        "precipitate": false,
+        "description": "Methyl orange turns red in acidic solution",
+        "observation": "Color changes to bright red"
+      }
+    },
+    {
+      "id": "methyl_orange_base",
+      "chemicals": ["NaOH", "MethylOrange"],
+      "ratio": [10, 1],
+      "results": {
+        "colorChange": "#ffff00",
+        "effervescence": false,
+        "temperatureChange": "none",
+        "precipitate": false,
+        "description": "Methyl orange turns yellow in basic solution",
+        "observation": "Color changes to bright yellow"
+      }
+    },
+    {
+      "id": "universal_acid",
+      "chemicals": ["HCl", "UniversalIndicator"],
+      "ratio": [10, 1],
+      "results": {
+        "colorChange": "#ff0000",
+        "effervescence": false,
+        "temperatureChange": "none",
+        "precipitate": false,
+        "description": "Universal indicator shows red for strong acid",
+        "observation": "Color changes to red indicating pH 1-2"
+      }
+    },
+    {
+      "id": "universal_base",
+      "chemicals": ["NaOH", "UniversalIndicator"],
+      "ratio": [10, 1],
+      "results": {
+        "colorChange": "#800080",
+        "effervescence": false,
+        "temperatureChange": "none",
+        "precipitate": false,
+        "description": "Universal indicator shows purple for strong base",
+        "observation": "Color changes to purple indicating pH 13-14"
+      }
+    },
+    {
+      "id": "litmus_acid",
+      "chemicals": ["HCl", "Litmus"],
+      "ratio": [10, 1],
+      "results": {
+        "colorChange": "#ff0000",
+        "effervescence": false,
+        "temperatureChange": "none",
+        "precipitate": false,
+        "description": "Litmus turns red in acidic solution",
+        "observation": "Blue litmus paper turns red"
+      }
+    },
+    {
+      "id": "litmus_base",
+      "chemicals": ["NaOH", "Litmus"],
+      "ratio": [10, 1],
+      "results": {
+        "colorChange": "#0000ff",
+        "effervescence": false,
+        "temperatureChange": "none",
+        "precipitate": false,
+        "description": "Litmus turns blue in basic solution",
+        "observation": "Red litmus paper turns blue"
+      }
+    },
+    {
+      "id": "complex_neutralization",
+      "chemicals": ["H2SO4", "KOH"],
+      "ratio": [1, 2],
+      "results": {
+        "colorChange": "#f8f9fa",
+        "effervescence": false,
+        "temperatureChange": "strongly_exothermic",
+        "precipitate": false,
+        "description": "Strong acid-base neutralization",
+        "equation": "H₂SO₄ + 2KOH → K₂SO₄ + 2H₂O",
+        "observation": "Solution becomes very hot and colorless"
+      }
+    },
+    {
+      "id": "ammonia_acid",
+      "chemicals": ["NH4OH", "HNO3"],
+      "ratio": [1, 1],
+      "results": {
+        "colorChange": "#f8f9fa",
+        "effervescence": true,
+        "temperatureChange": "exothermic",
+        "precipitate": false,
+        "description": "Weak base with strong acid",
+        "equation": "NH₄OH + HNO₃ → NH₄NO₃ + H₂O",
+        "observation": "Slight fizzing and warming occurs"
+      }
+    },
+    {
+      "id": "copper_ammonia",
+      "chemicals": ["CuSO4", "NH4OH"],
+      "ratio": [1, 4],
+      "results": {
+        "colorChange": "#4169e1",
+        "effervescence": false,
+        "temperatureChange": "slight_endothermic",
+        "precipitate": false,
+        "description": "Formation of deep blue copper-ammonia complex",
+        "equation": "CuSO₄ + 4NH₄OH → [Cu(NH₃)₄]SO₄ + 4H₂O",
+        "observation": "Solution turns deep blue color"
+      }
+    },
+    {
+      "id": "alcohol_acid",
+      "chemicals": ["Ethanol", "H2SO4"],
+      "ratio": [1, 1],
+      "results": {
+        "colorChange": "#2c3e50",
+        "effervescence": true,
+        "temperatureChange": "strongly_exothermic",
+        "precipitate": false,
+        "description": "Dehydration of ethanol by concentrated sulfuric acid",
+        "observation": "Solution darkens and produces heat with gas evolution"
+      }
+    },
+    {
+      "id": "solvent_mixing",
+      "chemicals": ["Ethanol", "Acetone"],
+      "ratio": [1, 1],
+      "results": {
+        "colorChange": "#e67e22",
+        "effervescence": false,
+        "temperatureChange": "slight_exothermic",
+        "precipitate": false,
+        "description": "Miscible organic solvents mix completely",
+        "observation": "Solvents mix smoothly with slight color change"
+      }
+    },
+    {
+      "id": "iron_indicator",
+      "chemicals": ["FeCl3", "Phenolphthalein"],
+      "ratio": [10, 1],
+      "results": {
+        "colorChange": "#ffffff",
+        "effervescence": false,
+        "temperatureChange": "none",
+        "precipitate": false,
+        "description": "Iron chloride solution is acidic, keeping phenolphthalein colorless",
+        "observation": "No color change - remains clear due to acidic conditions"
+      }
+    },
+    {
+      "id": "double_displacement",
+      "chemicals": ["BaCl2", "AgNO3"],
+      "ratio": [1, 2],
+      "results": {
+        "colorChange": "#ffffff",
+        "effervescence": false,
+        "temperatureChange": "none",
+        "precipitate": true,
+        "description": "Double displacement forming both barium nitrate and silver chloride",
+        "equation": "BaCl₂ + 2AgNO₃ → Ba(NO₃)₂ + 2AgCl",
+        "observation": "White precipitate of silver chloride forms"
+      }
+    }
+  ],
+  "safetyNotes": {
+    "corrosive": "Handle with extreme care. Use protective equipment.",
+    "caustic": "Can cause severe burns. Avoid skin contact.",
+    "oxidizing": "Can intensify fires. Keep away from combustibles.",
+    "toxic": "Harmful if ingested or inhaled. Use in ventilated area.",
+    "irritant": "May cause irritation to eyes and skin.",
+    "safe": "Generally safe to handle with basic precautions.",
+    "indicator": "Safe indicator solution for pH testing.",
+    "flammable": "Highly flammable. Keep away from heat sources and flames."
+  }
+}

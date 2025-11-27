@@ -3,7 +3,15 @@
   "private": true,
   "version": "1.0.0",
   "description": "Virtual Chemistry Laboratory for DI-Hack 2025 - Accessible science education for students with disabilities",
-  "keywords": ["accessibility", "chemistry", "virtual-lab", "education", "three.js", "react", "di-hack-2025"],
+  "keywords": [
+    "accessibility",
+    "chemistry",
+    "virtual-lab",
+    "education",
+    "three.js",
+    "react",
+    "di-hack-2025"
+  ],
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,8 +20,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-three/cannon": "^6.6.0",
     "@react-three/drei": "^10.7.6",
     "@react-three/fiber": "^9.3.0",
+    "@react-three/postprocessing": "^3.0.4",
     "framer-motion": "^12.23.22",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

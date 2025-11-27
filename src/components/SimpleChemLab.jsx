@@ -2,7 +2,9 @@ import React, { useRef, useState, useEffect } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Text, Box, Cylinder, Sphere, OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
-import InteractiveLabel from './InteractiveLabel'
+import chemicalData from '../data/chemicalMixtures.json'
+import FirstPersonControls from './FirstPersonControls'
+import MixingWorkspace from './MixingWorkspace'
 
 function LabEquipment({ position, type, onClick, isSelected }) {
   const meshRef = useRef()
@@ -31,14 +33,9 @@ function LabEquipment({ position, type, onClick, isSelected }) {
             <Cylinder args={[0.3, 0.4, 0.8]} position={[0, 0.4, 0]}>
               <meshLambertMaterial color={getEquipmentColor()} transparent opacity={0.8} />
             </Cylinder>
-            <InteractiveLabel 
-              position={[0, -0.3, 0]} 
-              text="Beaker" 
-              fontSize={0.08}
-              itemName="Glass Beaker"
-              description="Used for mixing and heating chemical solutions"
-              billboardToCamera={true}
-            />
+            <Text position={[0, -0.3, 0]} fontSize={0.1} color="white" anchorX="center">
+              Beaker
+            </Text>
           </group>
         )
       case 'flask':
@@ -50,14 +47,9 @@ function LabEquipment({ position, type, onClick, isSelected }) {
             <Cylinder args={[0.1, 0.1, 0.4]} position={[0, 0.7, 0]}>
               <meshLambertMaterial color={getEquipmentColor()} transparent opacity={0.8} />
             </Cylinder>
-            <InteractiveLabel 
-              position={[0, -0.3, 0]} 
-              text="Flask" 
-              fontSize={0.08}
-              itemName="Conical Flask"
-              description="Used for mixing and storing chemical solutions"
-              billboardToCamera={true}
-            />
+            <Text position={[0, -0.3, 0]} fontSize={0.1} color="white" anchorX="center">
+              Flask
+            </Text>
           </group>
         )
       case 'testtube':
@@ -66,14 +58,9 @@ function LabEquipment({ position, type, onClick, isSelected }) {
             <Cylinder args={[0.05, 0.05, 0.6]} position={[0, 0.3, 0]}>
               <meshLambertMaterial color={getEquipmentColor()} transparent opacity={0.8} />
             </Cylinder>
-            <InteractiveLabel 
-              position={[0, -0.2, 0]} 
-              text="Test Tube" 
-              fontSize={0.06}
-              itemName="Glass Test Tube"
-              description="Used for small-scale chemical reactions and testing"
-              billboardToCamera={true}
-            />
+            <Text position={[0, -0.2, 0]} fontSize={0.08} color="white" anchorX="center">
+              Test Tube
+            </Text>
           </group>
         )
       case 'burner':
@@ -85,14 +72,9 @@ function LabEquipment({ position, type, onClick, isSelected }) {
             <Cylinder args={[0.05, 0.05, 0.2]} position={[0, 0.4, 0]}>
               <meshLambertMaterial color="#333333" />
             </Cylinder>
-            <InteractiveLabel 
-              position={[0, -0.2, 0]} 
-              text="Bunsen Burner" 
-              fontSize={0.06}
-              itemName="Bunsen Burner"
-              description="Gas burner used for heating chemical solutions"
-              billboardToCamera={true}
-            />
+            <Text position={[0, -0.2, 0]} fontSize={0.08} color="white" anchorX="center">
+              Bunsen Burner
+            </Text>
           </group>
         )
       default:
@@ -112,30 +94,60 @@ function LabEquipment({ position, type, onClick, isSelected }) {
   )
 }
 
-// Camera initialization component
-function CameraController() {
-  const { camera, gl, scene, invalidate } = useThree()
+function CameraSetup() {
+  const { camera, gl, size } = useThree()
   
   useEffect(() => {
-    // Set camera position immediately on mount
-    camera.position.set(0, 4, 8)
-    camera.lookAt(0, 2, 0)
-    camera.updateProjectionMatrix()
-    
-    // Ensure the renderer is properly sized
-    const canvas = gl.domElement
-    if (canvas) {
-      gl.setSize(canvas.clientWidth, canvas.clientHeight, false)
+    // Force immediate sharp rendering
+    const forceSharpRender = () => {
+      gl.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+      gl.setSize(window.innerWidth, window.innerHeight, false)
+      gl.domElement.style.width = '100vw'
+      gl.domElement.style.height = '100vh'
+      gl.domElement.style.imageRendering = 'auto'
+      gl.domElement.style.imageRendering = 'crisp-edges'
     }
     
-    // Force a re-render to apply changes immediately
-    invalidate()
-  }, [camera, gl, scene, invalidate])
+    // Initial setup
+    camera.position.set(0, 2.5, 4)
+    camera.lookAt(0, 1.8, -1)
+    camera.updateProjectionMatrix()
+    
+    // Force sharp rendering immediately
+    forceSharpRender()
+    
+    // Force another refresh after a brief delay to ensure it sticks
+    setTimeout(forceSharpRender, 100)
+    setTimeout(forceSharpRender, 500)
+    
+    // Enable better rendering quality
+    gl.shadowMap.enabled = true
+    gl.shadowMap.type = THREE.PCFSoftShadowMap
+  }, [camera, gl])
+  
+  useEffect(() => {
+    // Handle size changes with forced pixel ratio update
+    const updateSize = () => {
+      gl.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+      gl.setSize(size.width, size.height, false)
+      camera.aspect = size.width / size.height
+      camera.updateProjectionMatrix()
+      
+      // Force DOM update
+      gl.domElement.style.width = '100vw'
+      gl.domElement.style.height = '100vh'
+    }
+    
+    updateSize()
+    
+    // Additional update after brief delay
+    setTimeout(updateSize, 50)
+  }, [size, camera, gl])
   
   return null
 }
 
-function ChemistryLabScene() {
+function ChemistryLabScene({ selectedChemicals, setSelectedChemicals, onContextSelect }) {
   const [selectedEquipment, setSelectedEquipment] = useState(null)
 
   const handleEquipmentClick = (equipmentType) => {
@@ -143,34 +155,61 @@ function ChemistryLabScene() {
     console.log(`Selected: ${equipmentType}`)
   }
 
+  const handleChemicalClick = (chemicalId) => {
+    if (selectedChemicals.includes(chemicalId)) {
+      setSelectedChemicals(prev => prev.filter(id => id !== chemicalId))
+    } else if (selectedChemicals.length < 2) {
+      setSelectedChemicals(prev => [...prev, chemicalId])
+    }
+    console.log(`Selected chemicals: ${selectedChemicals}`)
+  }
+
+  const handleChemicalRightClick = (e, chemicalId) => {
+    e.stopPropagation()
+    e.preventDefault()
+    onContextSelect(chemicalId, e.clientX, e.clientY)
+  }
+
   return (
     <>
-      {/* Camera Controller for immediate initialization */}
-      <CameraController />
+      {/* Camera Setup */}
+      <CameraSetup />
       
       {/* Lighting */}
-      <ambientLight intensity={0.8} />
-      <directionalLight position={[5, 10, 5]} intensity={1.5} color="#ffffff" castShadow />
-      <pointLight position={[0, 5, 0]} intensity={1} color="#ffffff" />
+      <ambientLight intensity={0.6} />
+      <directionalLight 
+        position={[5, 10, 5]} 
+        intensity={1.2} 
+        color="#ffffff" 
+        castShadow 
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-far={50}
+        shadow-camera-left={-20}
+        shadow-camera-right={20}
+        shadow-camera-top={20}
+        shadow-camera-bottom={-20}
+      />
+      <pointLight position={[0, 6, 0]} intensity={0.8} color="#ffffff" />
+      <pointLight position={[-8, 4, 0]} intensity={0.4} color="#ffffff" />
+      <pointLight position={[8, 4, 0]} intensity={0.4} color="#ffffff" />
       
-      {/* Camera Controls - Properly Configured */}
+      {/* Camera Controls - Immersive First Person View */}
       <OrbitControls 
-        makeDefault
         enablePan={true}
         enableZoom={true}
-        enableRotate={true}
-        maxPolarAngle={Math.PI / 2.1}
-        minPolarAngle={Math.PI / 6}
-        maxDistance={15}
-        minDistance={3}
-        target={[0, 2, 0]}
+        maxPolarAngle={Math.PI / 1.8}
+        minPolarAngle={-Math.PI / 6}
+        maxDistance={12}
+        minDistance={2}
+        target={[0, 1.8, -1]}
         enableDamping={true}
-        dampingFactor={0.05}
-        rotateSpeed={0.8}
-        zoomSpeed={1.0}
-        panSpeed={0.8}
+        dampingFactor={0.08}
         autoRotate={false}
-        regress
+        makeDefault
+        zoomSpeed={0.8}
+        panSpeed={0.8}
+        rotateSpeed={0.5}
       />
       
       {/* ROOM STRUCTURE - Immersive Scale */}
@@ -375,15 +414,25 @@ function ChemistryLabScene() {
       
       {/* Indicator Solutions */}
       {[
-        { name: 'Phenolphthalein', color: '#ff69b4', short: 'PhPh', pos: -8.5, shelf: 5.1 },
-        { name: 'Methyl Orange', color: '#ff4500', short: 'MO', pos: -7, shelf: 5.1 },
-        { name: 'Litmus', color: '#8a2be2', short: 'Litmus', pos: -5.5, shelf: 3.8 },
-        { name: 'Universal', color: '#32cd32', short: 'Universal', pos: -7, shelf: 3.8 }
+        { id: 'Phenolphthalein', name: 'Phenolphthalein', color: '#ff69b4', short: 'PhPh', pos: -8.5, shelf: 5.1 },
+        { id: 'MethylOrange', name: 'Methyl Orange', color: '#ff4500', short: 'MO', pos: -7, shelf: 5.1 },
+        { id: 'Litmus', name: 'Litmus', color: '#8a2be2', short: 'Litmus', pos: -5.5, shelf: 3.8 },
+        { id: 'UniversalIndicator', name: 'Universal', color: '#32cd32', short: 'Universal', pos: -7, shelf: 3.8 }
       ].map((indicator, i) => (
-        <group key={i} position={[5.2, indicator.shelf, indicator.pos]}>
+        <group 
+          key={i} 
+          position={[5.2, indicator.shelf, indicator.pos]}
+          onClick={() => handleChemicalClick(indicator.id)}
+          onPointerOver={(e) => { document.body.style.cursor = 'pointer' }}
+          onPointerOut={(e) => { document.body.style.cursor = 'auto' }}
+        >
           {/* Bottle Body */}
           <Cylinder args={[0.12, 0.12, 0.3]} position={[0, 0, 0]}>
-            <meshStandardMaterial color={indicator.color} transparent opacity={0.8} />
+            <meshStandardMaterial 
+              color={selectedChemicals.includes(indicator.id) ? '#00ff88' : indicator.color} 
+              transparent 
+              opacity={0.8} 
+            />
           </Cylinder>
           {/* Bottle Cap */}
           <Cylinder args={[0.1, 0.1, 0.05]} position={[0, 0.18, 0]}>
@@ -493,15 +542,25 @@ function ChemistryLabScene() {
       
       {/* Solvent Bottles */}
       {[
-        { name: 'Acetone', color: '#f39c12', pos: -1.5, shelf: 4.0 },
-        { name: 'Ethanol', color: '#3498db', pos: 0.5, shelf: 4.0 },
-        { name: 'Methanol', color: '#9b59b6', pos: 2.5, shelf: 2.5 },
-        { name: 'Hexane', color: '#1abc9c', pos: 4.5, shelf: 2.5 }
+        { id: 'Acetone', name: 'Acetone', color: '#f39c12', pos: -1.5, shelf: 4.0 },
+        { id: 'Ethanol', name: 'Ethanol', color: '#3498db', pos: 0.5, shelf: 4.0 },
+        { id: 'Methanol', name: 'Methanol', color: '#9b59b6', pos: 2.5, shelf: 2.5 },
+        { id: 'Hexane', name: 'Hexane', color: '#1abc9c', pos: 4.5, shelf: 2.5 }
       ].map((solvent, i) => (
-        <group key={`solvent-${i}`} position={[-8.2, solvent.shelf, solvent.pos]}>
+        <group 
+          key={`solvent-${i}`} 
+          position={[-8.2, solvent.shelf, solvent.pos]}
+          onClick={() => handleChemicalClick(solvent.id)}
+          onPointerOver={(e) => { document.body.style.cursor = 'pointer' }}
+          onPointerOut={(e) => { document.body.style.cursor = 'auto' }}
+        >
           {/* Bottle Body */}
           <Cylinder args={[0.15, 0.15, 0.5]} position={[0, 0, 0]}>
-            <meshStandardMaterial color={solvent.color} transparent opacity={0.7} />
+            <meshStandardMaterial 
+              color={selectedChemicals.includes(solvent.id) ? '#00ff88' : solvent.color} 
+              transparent 
+              opacity={0.7} 
+            />
           </Cylinder>
           {/* Bottle Cap */}
           <Cylinder args={[0.12, 0.12, 0.08]} position={[0, 0.29, 0]}>
@@ -606,15 +665,26 @@ function ChemistryLabScene() {
       
       {/* Chemical Bottles - Top Shelf (Acids) */}
       {[
-        { name: 'HCl', color: '#e74c3c', pos: -3.5 },
-        { name: 'H₂SO₄', color: '#8e44ad', pos: -1.5 },
-        { name: 'HNO₃', color: '#f39c12', pos: 0.5 },
-        { name: 'CH₃COOH', color: '#3498db', pos: 2.5 }
+        { id: 'HCl', name: 'HCl', color: '#e74c3c', pos: -3.5 },
+        { id: 'H2SO4', name: 'H₂SO₄', color: '#8e44ad', pos: -1.5 },
+        { id: 'HNO3', name: 'HNO₃', color: '#f39c12', pos: 0.5 },
+        { id: 'BaCl2', name: 'BaCl₂', color: '#ecf0f1', pos: 2.5 }
       ].map((chemical, i) => (
-        <group key={`acid-${i}`} position={[8.2, 5.55, chemical.pos]}>
+        <group
+          key={`acid-${i}`}
+          position={[8.2, 5.55, chemical.pos]}
+          onClick={() => handleChemicalClick(chemical.id)}
+          onContextMenu={(e) => handleChemicalRightClick(e, chemical.id)}
+          onPointerOver={(e) => { document.body.style.cursor = 'pointer' }}
+          onPointerOut={(e) => { document.body.style.cursor = 'auto' }}
+        >
           {/* Bottle Body */}
           <Cylinder args={[0.15, 0.15, 0.5]} position={[0, 0, 0]}>
-            <meshStandardMaterial color={chemical.color} transparent opacity={0.7} />
+            <meshStandardMaterial
+              color={selectedChemicals.includes(chemical.id) ? '#00ff88' : chemical.color}
+              transparent
+              opacity={0.7}
+            />
           </Cylinder>
           {/* Bottle Cap */}
           <Cylinder args={[0.12, 0.12, 0.08]} position={[0, 0.29, 0]}>
@@ -639,15 +709,25 @@ function ChemistryLabScene() {
       
       {/* Chemical Bottles - Second Shelf (Bases) */}
       {[
-        { name: 'NaOH', color: '#27ae60', pos: -3.5 },
-        { name: 'KOH', color: '#2ecc71', pos: -1.5 },
-        { name: 'NH₄OH', color: '#16a085', pos: 0.5 },
-        { name: 'Ca(OH)₂', color: '#1abc9c', pos: 2.5 }
+        { id: 'NaOH', name: 'NaOH', color: '#27ae60', pos: -3.5 },
+        { id: 'KOH', name: 'KOH', color: '#2ecc71', pos: -1.5 },
+        { id: 'NH4OH', name: 'NH₄OH', color: '#16a085', pos: 0.5 },
+        { id: 'AgNO3', name: 'AgNO₃', color: '#95a5a6', pos: 2.5 }
       ].map((chemical, i) => (
-        <group key={`base-${i}`} position={[8.2, 4.05, chemical.pos]}>
+        <group 
+          key={`base-${i}`} 
+          position={[8.2, 4.05, chemical.pos]}
+          onClick={() => handleChemicalClick(chemical.id)}
+          onPointerOver={(e) => { document.body.style.cursor = 'pointer' }}
+          onPointerOut={(e) => { document.body.style.cursor = 'auto' }}
+        >
           {/* Bottle Body */}
           <Cylinder args={[0.15, 0.15, 0.5]} position={[0, 0, 0]}>
-            <meshStandardMaterial color={chemical.color} transparent opacity={0.7} />
+            <meshStandardMaterial 
+              color={selectedChemicals.includes(chemical.id) ? '#00ff88' : chemical.color} 
+              transparent 
+              opacity={0.7} 
+            />
           </Cylinder>
           {/* Bottle Cap */}
           <Cylinder args={[0.12, 0.12, 0.08]} position={[0, 0.29, 0]}>
@@ -672,15 +752,25 @@ function ChemistryLabScene() {
       
       {/* Chemical Bottles - Third Shelf (Salts) */}
       {[
-        { name: 'NaCl', color: '#ffffff', pos: -3.5 },
-        { name: 'CuSO₄', color: '#3498db', pos: -1.5 },
-        { name: 'FeCl₃', color: '#f39c12', pos: 0.5 },
-        { name: 'AgNO₃', color: '#95a5a6', pos: 2.5 }
+        { id: 'NaCl', name: 'NaCl', color: '#ffffff', pos: -3.5 },
+        { id: 'CuSO4', name: 'CuSO₄', color: '#3498db', pos: -1.5 },
+        { id: 'FeCl3', name: 'FeCl₃', color: '#f39c12', pos: 0.5 },
+        { id: 'BaCl2', name: 'BaCl₂', color: '#ecf0f1', pos: 2.5 }
       ].map((chemical, i) => (
-        <group key={`salt-${i}`} position={[8.2, 2.55, chemical.pos]}>
+        <group 
+          key={`salt-${i}`} 
+          position={[8.2, 2.55, chemical.pos]}
+          onClick={() => handleChemicalClick(chemical.id)}
+          onPointerOver={(e) => { document.body.style.cursor = 'pointer' }}
+          onPointerOut={(e) => { document.body.style.cursor = 'auto' }}
+        >
           {/* Bottle Body */}
           <Cylinder args={[0.15, 0.15, 0.5]} position={[0, 0, 0]}>
-            <meshStandardMaterial color={chemical.color} transparent opacity={0.8} />
+            <meshStandardMaterial 
+              color={selectedChemicals.includes(chemical.id) ? '#00ff88' : chemical.color} 
+              transparent 
+              opacity={0.8} 
+            />
           </Cylinder>
           {/* Bottle Cap */}
           <Cylinder args={[0.12, 0.12, 0.08]} position={[0, 0.29, 0]}>
@@ -1026,34 +1116,158 @@ function ChemistryLabScene() {
 }
 
 function ChemistryLab({ onBack }) {
+  const [selectedChemicals, setSelectedChemicals] = useState([])
+  const [mixingResult, setMixingResult] = useState(null)
+  const [showMixingPanel, setShowMixingPanel] = useState(false)
+  const [cart, setCart] = useState([])
+  const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0, chemicalId: null })
+  const [showMixingWorkspace, setShowMixingWorkspace] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState([])
+  const [showSearchResults, setShowSearchResults] = useState(false)
+
   useEffect(() => {
-    // Prevent body scroll when in lab
+    // Ensure body and html have proper sizing
+    document.body.style.margin = '0'
+    document.body.style.padding = '0'
     document.body.style.overflow = 'hidden'
+    document.documentElement.style.width = '100%'
+    document.documentElement.style.height = '100%'
     
-    // Ensure proper viewport sizing
-    const handleResize = () => {
-      // Trigger canvas resize if needed
-      window.dispatchEvent(new Event('resize'))
-    }
-    
-    // Initial resize after mount
-    setTimeout(handleResize, 100)
+    // Add bubble animation CSS
+    const style = document.createElement('style')
+    style.textContent = `
+      @keyframes bubble {
+        0%, 100% { transform: translateX(-50%) translateY(0px); opacity: 1; }
+        50% { transform: translateX(-50%) translateY(-10px); opacity: 0.7; }
+      }
+    `
+    document.head.appendChild(style)
     
     return () => {
-      document.body.style.overflow = 'auto'
+      document.head.removeChild(style)
     }
   }, [])
+
+  const mixChemicals = () => {
+    if (selectedChemicals.length !== 2) return
+
+    // Find matching mixture in JSON data
+    const mixture = chemicalData.mixtures.find(mix => 
+      mix.chemicals.every(chem => selectedChemicals.includes(chem)) &&
+      selectedChemicals.every(chem => mix.chemicals.includes(chem))
+    )
+
+    if (mixture) {
+      setMixingResult(mixture.results)
+      setShowMixingPanel(true)
+    } else {
+      // Default reaction for unmapped combinations
+      setMixingResult({
+        colorChange: "#f8f9fa",
+        effervescence: false,
+        temperatureChange: "none",
+        precipitate: false,
+        description: "No significant reaction observed",
+        observation: "Chemicals mixed but no visible change occurred"
+      })
+      setShowMixingPanel(true)
+    }
+  }
+
+  const clearMixing = () => {
+    setSelectedChemicals([])
+    setMixingResult(null)
+    setShowMixingPanel(false)
+  }
+
+  const addToCart = (chemicalId) => {
+    setCart(prev => prev.includes(chemicalId) ? prev : [...prev, chemicalId])
+    setContextMenu({ visible: false, x: 0, y: 0, chemicalId: null })
+  }
+
+  const removeFromCart = (chemicalId) => {
+    setCart(prev => prev.filter(id => id !== chemicalId))
+  }
+
+  const handleContextSelect = (chemicalId, x, y) => {
+    setContextMenu({ visible: true, x, y, chemicalId })
+  }
+
+  const closeContextMenu = () => setContextMenu({ visible: false, x: 0, y: 0, chemicalId: null })
+
+  const handleSearch = (query) => {
+    setSearchQuery(query)
+    if (query.trim() === '') {
+      setSearchResults([])
+      setShowSearchResults(false)
+      return
+    }
+
+    // Search for chemicals by name or ID
+    const results = Object.keys(chemicalData.chemicals).filter(id => {
+      const chemical = chemicalData.chemicals[id]
+      return (
+        id.toLowerCase().includes(query.toLowerCase()) ||
+        chemical.name.toLowerCase().includes(query.toLowerCase())
+      )
+    })
+
+    setSearchResults(results)
+    setShowSearchResults(results.length > 0)
+  }
+
+  const handleSearchSelect = (chemicalId) => {
+    if (selectedChemicals.length < 2 && !selectedChemicals.includes(chemicalId)) {
+      setSelectedChemicals(prev => [...prev, chemicalId])
+    }
+    setSearchQuery('')
+    setShowSearchResults(false)
+  }
+
+  const handleSearchKeyDown = (e) => {
+    if (e.key === 'Enter' && searchResults.length > 0) {
+      handleSearchSelect(searchResults[0])
+    }
+  }
+
+  const goToMixingWorkspace = () => {
+    if (selectedChemicals.length >= 2) {
+      setShowMixingWorkspace(true)
+    }
+  }
+
+  const backToLab = () => {
+    setShowMixingWorkspace(false)
+  }
+
+  // If in mixing workspace, show that instead
+  if (showMixingWorkspace) {
+    return (
+      <MixingWorkspace
+        selectedChemicals={selectedChemicals}
+        onBack={backToLab}
+        onMixComplete={(result) => {
+          setMixingResult(result)
+          setShowMixingPanel(true)
+        }}
+      />
+    )
+  }
 
   return (
     <div className="chemistry-lab" style={{ 
       width: '100vw', 
       height: '100vh', 
-      position: 'relative',
-      overflow: 'hidden'
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      overflow: 'hidden',
+      background: '#000'
     }}>
       <Canvas 
         camera={{ 
-          position: [0, 4, 8], 
+          position: [0, 2.5, 4], 
           fov: 75,
           near: 0.1,
           far: 1000
@@ -1061,26 +1275,27 @@ function ChemistryLab({ onBack }) {
         aria-label="Virtual Chemistry Laboratory"
         role="application"
         shadows
+        dpr={[1, 2]}
         gl={{ 
           antialias: true,
           alpha: false,
-          preserveDrawingBuffer: false,
           powerPreference: "high-performance"
         }}
         style={{ 
-          width: '100%', 
-          height: '100%',
+          width: '100vw', 
+          height: '100vh',
           display: 'block',
-          background: '#f0f0f0'
-        }}
-        onCreated={({ gl, camera }) => {
-          // Ensure the canvas fills the viewport immediately
-          gl.setSize(window.innerWidth, window.innerHeight)
-          camera.aspect = window.innerWidth / window.innerHeight
-          camera.updateProjectionMatrix()
+          position: 'absolute',
+          top: 0,
+          left: 0
         }}
       >
-        <ChemistryLabScene />
+        <FirstPersonControls />
+        <ChemistryLabScene
+          selectedChemicals={selectedChemicals}
+          setSelectedChemicals={setSelectedChemicals}
+          onContextSelect={handleContextSelect}
+        />
       </Canvas>
       
       {/* Back Button - Fixed Overlay */}
@@ -1116,6 +1331,83 @@ function ChemistryLab({ onBack }) {
       >
         ← Back to Lobby
       </button>
+
+      {/* Chemical Search Bar */}
+      <div style={{
+        position: 'fixed',
+        top: '80px',
+        left: '20px',
+        zIndex: 1000,
+        width: '300px'
+      }}>
+        <div style={{ position: 'relative' }}>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => handleSearch(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
+            placeholder="🔍 Search chemicals..."
+            style={{
+              width: '100%',
+              padding: '12px 15px',
+              backgroundColor: 'rgba(0, 0, 0, 0.85)',
+              color: 'white',
+              border: '2px solid rgba(255, 255, 255, 0.3)',
+              borderRadius: '12px',
+              fontSize: '14px',
+              backdropFilter: 'blur(10px)',
+              outline: 'none'
+            }}
+          />
+          
+          {/* Search Results Dropdown */}
+          {showSearchResults && (
+            <div style={{
+              position: 'absolute',
+              top: '50px',
+              left: 0,
+              right: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.95)',
+              borderRadius: '8px',
+              border: '2px solid rgba(255, 255, 255, 0.2)',
+              maxHeight: '250px',
+              overflowY: 'auto',
+              backdropFilter: 'blur(10px)'
+            }}>
+              {searchResults.map((chemId) => (
+                <div
+                  key={chemId}
+                  onClick={() => handleSearchSelect(chemId)}
+                  style={{
+                    padding: '10px 15px',
+                    color: 'white',
+                    cursor: 'pointer',
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                    transition: 'background 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(52, 152, 219, 0.5)'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                >
+                  <div style={{ fontWeight: 'bold', fontSize: '14px' }}>
+                    {chemicalData.chemicals[chemId].name}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#bbb' }}>
+                    {chemId} • {chemicalData.chemicals[chemId].state}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div style={{
+          marginTop: '8px',
+          fontSize: '11px',
+          color: '#bbb',
+          textAlign: 'center'
+        }}>
+          Type chemical name and press Enter to add
+        </div>
+      </div>
       
       {/* Lab Controls UI - Fixed Overlay */}
       <div style={{
@@ -1185,8 +1477,351 @@ function ChemistryLab({ onBack }) {
           🛑 Emergency Stop
         </button>
       </div>
+
+      {/* Chemical Mixing Panel - Right Side */}
+      <div style={{
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        zIndex: 1000,
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        backdropFilter: 'blur(10px)',
+        borderRadius: '15px',
+        padding: '20px',
+        minWidth: '300px',
+        border: '2px solid rgba(255, 255, 255, 0.2)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)'
+      }}>
+        <h3 style={{ 
+          color: 'white', 
+          fontSize: '18px', 
+          marginBottom: '15px',
+          textAlign: 'center'
+        }}>
+          🧪 Chemical Mixing Station
+        </h3>
+        
+        <div style={{ marginBottom: '15px' }}>
+          <p style={{ color: '#bbb', fontSize: '14px', marginBottom: '10px' }}>
+            Selected Chemicals ({selectedChemicals.length}/2):
+          </p>
+          {selectedChemicals.map((chemId, index) => (
+            <div key={chemId} style={{
+              backgroundColor: 'rgba(52, 152, 219, 0.3)',
+              padding: '8px 12px',
+              borderRadius: '8px',
+              marginBottom: '5px',
+              color: 'white',
+              fontSize: '14px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <span>{chemicalData.chemicals[chemId]?.name || chemId}</span>
+              <button 
+                onClick={() => setSelectedChemicals(prev => prev.filter(id => id !== chemId))}
+                style={{
+                  background: 'rgba(231, 76, 60, 0.8)',
+                  border: 'none',
+                  borderRadius: '4px',
+                  color: 'white',
+                  cursor: 'pointer',
+                  padding: '2px 6px',
+                  fontSize: '12px'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '15px' }}>
+          <button
+            onClick={goToMixingWorkspace}
+            disabled={selectedChemicals.length < 2}
+            style={{
+              padding: '12px',
+              backgroundColor: selectedChemicals.length >= 2 ? 'rgba(155, 89, 182, 0.9)' : 'rgba(127, 140, 141, 0.5)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: selectedChemicals.length >= 2 ? 'pointer' : 'not-allowed',
+              fontSize: '14px',
+              fontWeight: 'bold'
+            }}
+          >
+            🧬 Go to Mixing Workspace
+          </button>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              onClick={mixChemicals}
+              disabled={selectedChemicals.length !== 2}
+              style={{
+                flex: 1,
+                padding: '12px',
+                backgroundColor: selectedChemicals.length === 2 ? 'rgba(46, 204, 113, 0.9)' : 'rgba(127, 140, 141, 0.5)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: selectedChemicals.length === 2 ? 'pointer' : 'not-allowed',
+                fontSize: '14px',
+                fontWeight: 'bold'
+              }}
+            >
+              Quick Mix
+            </button>
+            <button
+              onClick={clearMixing}
+              style={{
+                padding: '12px',
+                backgroundColor: 'rgba(231, 76, 60, 0.9)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: 'bold'
+              }}
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+
+        <div style={{ 
+          fontSize: '12px', 
+          color: '#bbb',
+          textAlign: 'center',
+          fontStyle: 'italic'
+        }}>
+          Click on chemical bottles to select them for mixing
+        </div>
+      </div>
+
+      {/* Reaction Results Modal */}
+      {showMixingPanel && mixingResult && (
+        <div style={{
+          position: 'fixed',
+          top: '0',
+          left: '0',
+          width: '100vw',
+          height: '100vh',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 2000
+        }}>
+          <div style={{
+            backgroundColor: 'rgba(20, 20, 20, 0.95)',
+            backdropFilter: 'blur(20px)',
+            borderRadius: '20px',
+            padding: '30px',
+            maxWidth: '500px',
+            width: '90%',
+            border: '2px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 16px 64px rgba(0, 0, 0, 0.7)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h2 style={{ color: 'white', fontSize: '24px', margin: 0 }}>
+                🧬 Reaction Results
+              </h2>
+              <button
+                onClick={clearMixing}
+                style={{
+                  background: 'rgba(231, 76, 60, 0.8)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  color: 'white',
+                  cursor: 'pointer',
+                  width: '30px',
+                  height: '30px',
+                  fontSize: '16px'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ 
+                backgroundColor: mixingResult.colorChange,
+                height: '60px',
+                borderRadius: '10px',
+                border: '2px solid rgba(255, 255, 255, 0.3)',
+                marginBottom: '15px',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                {mixingResult.effervescence && (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '0',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    color: 'white',
+                    fontSize: '20px',
+                    animation: 'bubble 1s infinite'
+                  }}>
+                    💭💭💭
+                  </div>
+                )}
+                {mixingResult.precipitate && (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '5px',
+                    left: '0',
+                    right: '0',
+                    height: '10px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                    borderRadius: '0 0 8px 8px'
+                  }} />
+                )}
+              </div>
+            </div>
+
+            <div style={{ color: 'white', lineHeight: 1.6 }}>
+              <p><strong>🔬 Observation:</strong> {mixingResult.observation}</p>
+              <p><strong>📝 Description:</strong> {mixingResult.description}</p>
+              {mixingResult.equation && (
+                <p><strong>⚗️ Chemical Equation:</strong> {mixingResult.equation}</p>
+              )}
+              <div style={{ display: 'flex', gap: '20px', marginTop: '15px', fontSize: '14px' }}>
+                <span>🌡️ Temperature: {mixingResult.temperatureChange}</span>
+                <span>🫧 Effervescence: {mixingResult.effervescence ? 'Yes' : 'No'}</span>
+                <span>🥄 Precipitate: {mixingResult.precipitate ? 'Yes' : 'No'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Context Menu */}
+      {contextMenu.visible && (
+        <div
+          style={{
+            position: 'fixed',
+            top: contextMenu.y,
+            left: contextMenu.x,
+            background: 'rgba(30,30,30,0.95)',
+            color: '#fff',
+            padding: '10px',
+            borderRadius: '8px',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+            zIndex: 2000,
+            minWidth: '180px'
+          }}
+          role="menu"
+          aria-label={`Actions for ${contextMenu.chemicalId}`}
+          onMouseLeave={closeContextMenu}
+        >
+          <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>{chemicalData.chemicals[contextMenu.chemicalId]?.name || contextMenu.chemicalId}</div>
+          <button
+            onClick={() => addToCart(contextMenu.chemicalId)}
+            style={buttonStyle}
+            aria-label="Add to cart"
+          >➕ Add to Cart</button>
+          <button
+            onClick={() => {
+              setSelectedChemicals(prev => prev.length < 2 && !prev.includes(contextMenu.chemicalId) ? [...prev, contextMenu.chemicalId] : prev)
+              closeContextMenu()
+            }}
+            style={buttonStyle}
+            aria-label="Select for mixing"
+          >🧪 Select for Mixing</button>
+          <button onClick={closeContextMenu} style={buttonStyle} aria-label="Close menu">✕ Close</button>
+        </div>
+      )}
+
+      {/* Cart panel */}
+      <div
+        style={{
+          position: 'fixed',
+          right: '20px',
+          bottom: '20px',
+          background: 'rgba(0,0,0,0.85)',
+          color: '#fff',
+          padding: '16px',
+          borderRadius: '14px',
+          width: '260px',
+          border: '2px solid rgba(255,255,255,0.15)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 1200
+        }}
+        aria-label="Chemical selection cart"
+      >
+        <h4 style={{ margin: '0 0 10px', fontSize: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          Cart 🧺 <span style={{ fontSize: '12px', fontWeight: 'normal' }}>{cart.length} items</span>
+        </h4>
+        {cart.length === 0 && <p style={{ fontSize: '12px', color: '#ccc' }}>Right-click a chemical and choose Add to Cart.</p>}
+        <ul style={{ listStyle: 'none', margin: 0, padding: 0, maxHeight: '140px', overflowY: 'auto' }}>
+          {cart.map(id => (
+            <li key={id} style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              background: 'rgba(255,255,255,0.05)',
+              padding: '6px 8px',
+              borderRadius: '6px',
+              marginBottom: '6px'
+            }}>
+              <span style={{ fontSize: '13px' }}>{chemicalData.chemicals[id]?.name || id}</span>
+              <div style={{ display: 'flex', gap: '4px' }}>
+                <button
+                  style={smallButtonStyle}
+                  aria-label="Select for mixing"
+                  onClick={() => setSelectedChemicals(prev => prev.length < 2 && !prev.includes(id) ? [...prev, id] : prev)}
+                >🧪</button>
+                <button
+                  style={smallButtonStyle}
+                  aria-label="Remove from cart"
+                  onClick={() => removeFromCart(id)}
+                >✕</button>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <div style={{ marginTop: '10px', display: 'flex', gap: '8px' }}>
+          <button
+            style={{ ...buttonStyle, flex: 1 }}
+            disabled={cart.length === 0}
+            onClick={() => setCart([])}
+            aria-label="Clear cart"
+          >Clear</button>
+          <button
+            style={{ ...buttonStyle, flex: 1, background: 'rgba(46,204,113,0.8)' }}
+            disabled={selectedChemicals.length !== 2}
+            onClick={() => mixChemicals()}
+            aria-label="Mix selected chemicals"
+          >Mix</button>
+        </div>
+      </div>
     </div>
   )
+}
+
+const buttonStyle = {
+  width: '100%',
+  background: 'rgba(52,152,219,0.7)',
+  color: '#fff',
+  border: 'none',
+  padding: '8px 10px',
+  marginBottom: '6px',
+  borderRadius: '6px',
+  cursor: 'pointer',
+  fontSize: '13px',
+  textAlign: 'left'
+}
+
+const smallButtonStyle = {
+  background: 'rgba(231,76,60,0.8)',
+  border: 'none',
+  color: '#fff',
+  cursor: 'pointer',
+  padding: '4px 6px',
+  borderRadius: '4px',
+  fontSize: '11px'
 }
 
 export default ChemistryLab
