@@ -1925,9 +1925,18 @@ function ChemistryLab({ onBack }) {
            </button>
          </div>
  
-         <div style={{ fontSize: 12, color: '#bbb', textAlign: 'center', marginTop: 10 }}>
-           Set molarity (M) and volume (mL) for each selected chemical. Values are stored locally and shown below each chemical (no other logic changed).
-         </div>
+         <div
+  style={{
+    fontSize: 12,
+    color: '#bbb',
+    textAlign: 'center',
+    marginTop: 10
+  }}
+>
+  NB: FIND THE AMOUNT OF SUBSTANCE (MOL) BY MULTIPLYING MOLARITY (M) BY VOLUME (L).<br />
+  i.e. n = cV.
+</div>
+
        </div>
 
       {/* Reaction Results Modal */}
