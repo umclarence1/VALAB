@@ -93,6 +93,7 @@ function LabEquipment({ position, type, onClick, isSelected }) {
 
 function ChemistryLabScene() {
   const [selectedEquipment, setSelectedEquipment] = useState(null)
+  const [selectedChemical, setSelectedChemical] = useState(null)
   const [experiment, setExperiment] = useState({
     step: 0,
     substances: [],
@@ -100,10 +101,23 @@ function ChemistryLabScene() {
   })
 
   const handleEquipmentClick = (equipmentType) => {
+    // If a chemical is selected and the user taps the beaker, pour it in
+    if (equipmentType === 'beaker' && selectedChemical) {
+      console.log(`Pouring ${selectedChemical} into beaker`)
+      setExperiment(prev => ({
+        ...prev,
+        step: Math.max(prev.step, 1),
+        substances: [...prev.substances, selectedChemical]
+      }))
+      // Clear selected chemical after pouring
+      setSelectedChemical(null)
+      return
+    }
+
     setSelectedEquipment(equipmentType)
     console.log(`Selected: ${equipmentType}`)
-    
-    // Simple experiment logic
+
+    // Simple experiment logic when selecting the beaker without a selected chemical
     if (equipmentType === 'beaker' && experiment.step === 0) {
       setExperiment(prev => ({
         ...prev,
@@ -111,6 +125,11 @@ function ChemistryLabScene() {
         substances: ['Water']
       }))
     }
+  }
+
+  const handleChemicalClick = (substance) => {
+    setSelectedChemical(substance)
+    console.log(`Selected chemical: ${substance}`)
   }
 
   return (
@@ -338,9 +357,16 @@ function ChemistryLabScene() {
         </Text>
       </group>
       
-      {/* Chemical Substances on Wall Shelf */}
+      {/* Chemical Substances on Wall Shelf (tap to select a chemical) */}
       {['NaCl', 'H₂SO₄', 'CaCO₃', 'AgNO₃', 'HCl', 'NaOH'].map((substance, i) => (
-        <group key={i} position={[-4.5 + i * 1.5, 4.4, -7.8]}>
+        <group
+          key={i}
+          position={[-4.5 + i * 1.5, 4.4, -7.8]}
+          onClick={() => handleChemicalClick(substance)}
+          onPointerOver={(e) => { document.body.style.cursor = 'pointer' }}
+          onPointerOut={(e) => { document.body.style.cursor = 'auto' }}
+          scale={selectedChemical === substance ? [1.12, 1.12, 1.12] : [1,1,1]}
+        >
           <Cylinder args={[0.12, 0.12, 0.35]} position={[0, 0.18, 0]}>
             <meshLambertMaterial color={
               substance.includes('H₂SO₄') ? "#ff6b6b" :

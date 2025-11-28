@@ -1125,6 +1125,36 @@ function ChemistryLab({ onBack }) {
   const [setupChemicals, setSetupChemicals] = useState([])
   const [requiredTools, setRequiredTools] = useState([])
 
+  // --- Experiment preview state & helpers (shows brief when tapping an experiment) ---
+  const [experimentPreview, setExperimentPreview] = useState(null)
+  const [showExperimentInfo, setShowExperimentInfo] = useState(false)
+  
+  const experimentDescriptions = {
+    'Simple titration': 'Determine concentration of an unknown acid using a standard base. Add titrant until endpoint, record volume, calculate molarity.',
+    'Back titration': 'Add excess reagent to react with the analyte, then titrate leftover reagent. Useful when direct titration is impractical.',
+    'Redox titration': 'Titrate based on oxidation–reduction (electron transfer) reactions. Common oxidants: KMnO4, dichromate.',
+    'Distillation': 'Separate components by boiling point; collect fractions and measure yield. Use simple distillation for large b.p. differences.'
+  }
+
+  const previewExperiment = (exp) => {
+    setExperimentPreview(exp)
+    setShowExperimentInfo(true)
+  }
+
+  const confirmStartExperiment = () => {
+    if (!experimentPreview) return
+    setSelectedExperiment(experimentPreview)
+    setRequiredTools(toolsForExperiment[experimentPreview] || [])
+    setShowExperimentInfo(false)
+    setSetupStep(2)
+  }
+
+  const cancelExperimentPreview = () => {
+    setExperimentPreview(null)
+    setShowExperimentInfo(false)
+  }
+  // --- end experiment preview helpers ---
+
   // Tools required per experiment
   const toolsForExperiment = {
     'Simple titration': ['Burette (50 mL)', 'Pipette (25 mL)', 'Conical flask (Erlenmeyer)', 'Phenolphthalein indicator', 'Standard NaOH solution', 'White tile'],
@@ -1140,7 +1170,7 @@ function ChemistryLab({ onBack }) {
   const generateQuestionsFor = (experiment) => {
     const pool = {
       'Simple titration': [
-        'Determine the concentration of an unknown monoprotic acid using NaOH titration (3 significant figures).',
+        'Determine the concentration of an unknown monoprotic acid using NaOH titration.',
         'Calculate molarity of HCl using titration with standardized NaOH solution.'
       ],
       'Back titration': [
@@ -1222,12 +1252,13 @@ function ChemistryLab({ onBack }) {
   const [selectedChemicals, setSelectedChemicals] = useState([])
   const [mixingResult, setMixingResult] = useState(null)
   const [showMixingPanel, setShowMixingPanel] = useState(false)
-  const [cart, setCart] = useState([])
+  //  const [cart, setCart] = useState([])
   const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0, chemicalId: null })
   const [showMixingWorkspace, setShowMixingWorkspace] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [showSearchResults, setShowSearchResults] = useState(false)
+  const [selectedChemicalDetails, setSelectedChemicalDetails] = useState({})
 
   useEffect(() => {
     // Ensure body and html have proper sizing
@@ -1284,14 +1315,7 @@ function ChemistryLab({ onBack }) {
     setShowMixingPanel(false)
   }
 
-  const addToCart = (chemicalId) => {
-    setCart(prev => prev.includes(chemicalId) ? prev : [...prev, chemicalId])
-    setContextMenu({ visible: false, x: 0, y: 0, chemicalId: null })
-  }
-
-  const removeFromCart = (chemicalId) => {
-    setCart(prev => prev.filter(id => id !== chemicalId))
-  }
+ 
 
   const handleContextSelect = (chemicalId, x, y) => {
     setContextMenu({ visible: true, x, y, chemicalId })
@@ -1393,7 +1417,7 @@ function ChemistryLab({ onBack }) {
                   {experiments.map(exp => (
                     <button
                       key={exp}
-                      onClick={() => startExperiment(exp)}
+                      onClick={() => previewExperiment(exp)}
                       style={{
                         padding: '14px 16px',
                         background: 'linear-gradient(135deg, rgba(52,152,219,0.2), rgba(52,152,219,0.1))',
@@ -1428,6 +1452,23 @@ function ChemistryLab({ onBack }) {
               </div>
             )}
 
+            {/* Experiment Info Modal (preview when tapping an experiment) */}
+            {showExperimentInfo && experimentPreview && (
+              <div role="dialog" aria-modal="true" aria-label={`${experimentPreview} information`} style={{
+                position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'rgba(0,0,0,0.6)', zIndex: 3500, pointerEvents: 'auto'
+              }}>
+                <div style={{ width: 560, maxWidth: '94vw', background: '#081226', padding: 20, borderRadius: 12, color: 'white', border: '2px solid rgba(255,255,255,0.06)' }}>
+                  <h3 style={{ marginTop: 0, color: '#00d1ff' }}>{experimentPreview}</h3>
+                  <p style={{ color: '#cbd5e1', fontSize: 14, lineHeight: 1.5 }}>{experimentDescriptions[experimentPreview]}</p>
+                  <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 12 }}>
+                    <button onClick={cancelExperimentPreview} style={{ padding: '8px 12px', borderRadius: 8, background: '#374151', color: 'white', border: 'none' }}>Close</button>
+                    <button onClick={confirmStartExperiment} style={{ padding: '8px 12px', borderRadius: 8, background: 'linear-gradient(135deg,#16a34a,#0f7a38)', color: 'white', border: 'none' }}>Start this experiment</button>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             {/* Step 2 - Required Tools */}
             {setupStep === 2 && (
               <div>
@@ -1693,49 +1734,12 @@ function ChemistryLab({ onBack }) {
             transition: 'all 0.3s ease'
           }}
         >
-          🎤 Voice Commands
+         
         </button>
-        <button 
-          onClick={() => console.log('Help opened')}
-          aria-label="Open help guide"
-          style={{
-            padding: '10px 15px',
-            backgroundColor: 'rgba(241, 196, 15, 0.9)',
-            color: 'white',
-            border: '2px solid rgba(255, 255, 255, 0.3)',
-            borderRadius: '10px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: 'bold',
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
-            transition: 'all 0.3s ease'
-          }}
-        >
-          ❓ Help
-        </button>
-        <button 
-          onClick={() => console.log('Emergency stop')}
-          aria-label="Emergency stop"
-          style={{
-            padding: '10px 15px',
-            backgroundColor: 'rgba(231, 76, 60, 0.9)',
-            color: 'white',
-            border: '2px solid rgba(255, 255, 255, 0.3)',
-            borderRadius: '10px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: 'bold',
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
-            transition: 'all 0.3s ease'
-          }}
-        >
-          🛑 Emergency Stop
-        </button>
+       
       </div>
 
-      {/* Chemical Mixing Panel - Right Side */}
+      {/* Chemical Mixing Station (top-right) — UPDATED to allow entering molarity & volume per selected chemical */}
       <div style={{
         position: 'fixed',
         top: '20px',
@@ -1743,116 +1747,153 @@ function ChemistryLab({ onBack }) {
         zIndex: 1000,
         backgroundColor: 'rgba(0, 0, 0, 0.9)',
         backdropFilter: 'blur(10px)',
-        borderRadius: '15px',
-        padding: '20px',
-        minWidth: '300px',
-        border: '2px solid rgba(255, 255, 255, 0.2)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)'
+        borderRadius: '12px',
+        padding: '16px',
+        minWidth: '320px',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)'
       }}>
-        <h3 style={{ 
-          color: 'white', 
-          fontSize: '18px', 
-          marginBottom: '15px',
-          textAlign: 'center'
-        }}>
+        <h3 style={{ color: 'white', fontSize: '16px', marginBottom: '12px', textAlign: 'center' }}>
           🧪 Chemical Mixing Station
         </h3>
-        
-        <div style={{ marginBottom: '15px' }}>
-          <p style={{ color: '#bbb', fontSize: '14px', marginBottom: '10px' }}>
-            Selected Chemicals ({selectedChemicals.length}/2):
+
+        <div style={{ marginBottom: '10px' }}>
+          <p style={{ color: '#bbb', fontSize: '13px', marginBottom: '8px' }}>
+            Selected Chemicals ({selectedChemicals.length}/2)
           </p>
-          {selectedChemicals.map((chemId, index) => (
-            <div key={chemId} style={{
-              backgroundColor: 'rgba(52, 152, 219, 0.3)',
-              padding: '8px 12px',
-              borderRadius: '8px',
-              marginBottom: '5px',
-              color: 'white',
-              fontSize: '14px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <span>{chemicalData.chemicals[chemId]?.name || chemId}</span>
-              <button 
-                onClick={() => setSelectedChemicals(prev => prev.filter(id => id !== chemId))}
-                style={{
-                  background: 'rgba(231, 76, 60, 0.8)',
-                  border: 'none',
-                  borderRadius: '4px',
-                  color: 'white',
-                  cursor: 'pointer',
-                  padding: '2px 6px',
-                  fontSize: '12px'
-                }}
-              >
-                ✕
-              </button>
-            </div>
-          ))}
+
+          {selectedChemicals.length === 0 && (
+            <div style={{ color: '#9aa7b4', fontSize: 13 }}>Select up to two chemicals to set molarity & volume.</div>
+          )}
+
+          {selectedChemicals.map((chemId, idx) => {
+            const details = selectedChemicalDetails[chemId] || { mol: '', volume: '' }
+            return (
+              <div key={chemId} style={{
+                display: 'flex',
+                gap: '8px',
+                alignItems: 'center',
+                marginTop: 8,
+                padding: '8px',
+                borderRadius: 8,
+                background: 'rgba(255,255,255,0.02)'
+              }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ color: 'white', fontSize: 13, fontWeight: 600 }}>
+                    {chemicalData.chemicals[chemId]?.name || chemId}
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+                    <input
+                      aria-label={`Molarity for ${chemId}`}
+                      type="number"
+                      inputMode="decimal"
+                      step="any"
+                      placeholder="M (e.g. 0.10)"
+                      value={details.mol}
+                      onChange={(e) => setChemicalDetail(chemId, 'mol', e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur() }}
+                      style={{
+                        width: '118px',
+                        padding: '6px 8px',
+                        borderRadius: 6,
+                        border: '1px solid rgba(255,255,255,0.06)',
+                        background: 'rgba(0,0,0,0.55)',
+                        color: 'white',
+                        fontSize: 13,
+                        outline: 'none'
+                      }}
+                    />
+                    <input
+                      aria-label={`Volume (mL) for ${chemId}`}
+                      type="number"
+                      inputMode="decimal"
+                      step="any"
+                      placeholder="mL"
+                      value={details.volume}
+                      onChange={(e) => setChemicalDetail(chemId, 'volume', e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur() }}
+                      style={{
+                        width: '70px',
+                        padding: '6px 8px',
+                        borderRadius: 6,
+                        border: '1px solid rgba(255,255,255,0.06)',
+                        background: 'rgba(0,0,0,0.55)',
+                        color: 'white',
+                        fontSize: 13,
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <button
+                    aria-label={`Remove ${chemId}`}
+                    onClick={() => {
+                      setSelectedChemicals(prev => prev.filter(id => id !== chemId))
+                      setSelectedChemicalDetails(prev => {
+                        const next = { ...prev }; delete next[chemId]; return next
+                      })
+                    }}
+                    style={{
+                      background: 'rgba(231,76,60,0.9)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: 6,
+                      padding: '6px 8px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )
+          })}
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '15px' }}>
+        <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
           <button
             onClick={goToMixingWorkspace}
             disabled={selectedChemicals.length < 2}
             style={{
-              padding: '12px',
-              backgroundColor: selectedChemicals.length >= 2 ? 'rgba(155, 89, 182, 0.9)' : 'rgba(127, 140, 141, 0.5)',
-              color: 'white',
+              flex: 1,
+              padding: '10px',
+              borderRadius: 8,
               border: 'none',
-              borderRadius: '8px',
-              cursor: selectedChemicals.length >= 2 ? 'pointer' : 'not-allowed',
-              fontSize: '14px',
-              fontWeight: 'bold'
+              background: selectedChemicals.length >= 2 ? 'linear-gradient(90deg,#9b59b6,#6d3f9a)' : 'rgba(127,140,141,0.45)',
+              color: 'white',
+              fontWeight: 700,
+              cursor: selectedChemicals.length >= 2 ? 'pointer' : 'not-allowed'
             }}
           >
-            🧬 Go to Mixing Workspace
+            🧬 Workspace
           </button>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button
-              onClick={mixChemicals}
-              disabled={selectedChemicals.length !== 2}
-              style={{
-                flex: 1,
-                padding: '12px',
-                backgroundColor: selectedChemicals.length === 2 ? 'rgba(46, 204, 113, 0.9)' : 'rgba(127, 140, 141, 0.5)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: selectedChemicals.length === 2 ? 'pointer' : 'not-allowed',
-                fontSize: '14px',
-                fontWeight: 'bold'
-              }}
-            >
-              Quick Mix
-            </button>
-            <button
-              onClick={clearMixing}
-              style={{
-                padding: '12px',
-                backgroundColor: 'rgba(231, 76, 60, 0.9)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: 'bold'
-              }}
-            >
-              Clear
-            </button>
-          </div>
+
+          <button
+            onClick={() => {
+              // ensure details are kept; mixChemicals will read selectedChemicalDetails
+              mixChemicals()
+            }}
+            disabled={selectedChemicals.length !== 2}
+            style={{
+              width: 110,
+              padding: '10px',
+              borderRadius: 8,
+              border: 'none',
+              background: selectedChemicals.length === 2 ? 'linear-gradient(90deg,#2ecc71,#27ae60)' : 'rgba(127,140,141,0.45)',
+              color: 'white',
+              fontWeight: 700,
+              cursor: selectedChemicals.length === 2 ? 'pointer' : 'not-allowed'
+            }}
+            aria-disabled={selectedChemicals.length !== 2}
+          >
+            Quick Mix
+          </button>
         </div>
 
-        <div style={{ 
-          fontSize: '12px', 
-          color: '#bbb',
-          textAlign: 'center',
-          fontStyle: 'italic'
-        }}>
-          Click on chemical bottles to select them for mixing
+        <div style={{ fontSize: 12, color: '#bbb', textAlign: 'center', marginTop: 10 }}>
+          Set molarity (M) and volume (mL) for each selected chemical. Values are stored locally and included in the mix summary.
         </div>
       </div>
 
@@ -1974,11 +2015,7 @@ function ChemistryLab({ onBack }) {
           onMouseLeave={closeContextMenu}
         >
           <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>{chemicalData.chemicals[contextMenu.chemicalId]?.name || contextMenu.chemicalId}</div>
-          <button
-            onClick={() => addToCart(contextMenu.chemicalId)}
-            style={buttonStyle}
-            aria-label="Add to cart"
-          >➕ Add to Cart</button>
+         
           <button
             onClick={() => {
               setSelectedChemicals(prev => prev.length < 2 && !prev.includes(contextMenu.chemicalId) ? [...prev, contextMenu.chemicalId] : prev)
@@ -1991,69 +2028,7 @@ function ChemistryLab({ onBack }) {
         </div>
       )}
 
-      {/* Cart panel */}
-      <div
-        style={{
-          position: 'fixed',
-          right: '20px',
-          bottom: '20px',
-          background: 'rgba(0,0,0,0.85)',
-          color: '#fff',
-          padding: '16px',
-          borderRadius: '14px',
-          width: '260px',
-          border: '2px solid rgba(255,255,255,0.15)',
-          backdropFilter: 'blur(8px)',
-          zIndex: 1200
-        }}
-        aria-label="Chemical selection cart"
-      >
-        <h4 style={{ margin: '0 0 10px', fontSize: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          Cart 🧺 <span style={{ fontSize: '12px', fontWeight: 'normal' }}>{cart.length} items</span>
-        </h4>
-        {cart.length === 0 && <p style={{ fontSize: '12px', color: '#ccc' }}>Right-click a chemical and choose Add to Cart.</p>}
-        <ul style={{ listStyle: 'none', margin: 0, padding: 0, maxHeight: '140px', overflowY: 'auto' }}>
-          {cart.map(id => (
-            <li key={id} style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              background: 'rgba(255,255,255,0.05)',
-              padding: '6px 8px',
-              borderRadius: '6px',
-              marginBottom: '6px'
-            }}>
-              <span style={{ fontSize: '13px' }}>{chemicalData.chemicals[id]?.name || id}</span>
-              <div style={{ display: 'flex', gap: '4px' }}>
-                <button
-                  style={smallButtonStyle}
-                  aria-label="Select for mixing"
-                  onClick={() => setSelectedChemicals(prev => prev.length < 2 && !prev.includes(id) ? [...prev, id] : prev)}
-                >🧪</button>
-                <button
-                  style={smallButtonStyle}
-                  aria-label="Remove from cart"
-                  onClick={() => removeFromCart(id)}
-                >✕</button>
-              </div>
-            </li>
-          ))}
-        </ul>
-        <div style={{ marginTop: '10px', display: 'flex', gap: '8px' }}>
-          <button
-            style={{ ...buttonStyle, flex: 1 }}
-            disabled={cart.length === 0}
-            onClick={() => setCart([])}
-            aria-label="Clear cart"
-          >Clear</button>
-          <button
-            style={{ ...buttonStyle, flex: 1, background: 'rgba(46,204,113,0.8)' }}
-            disabled={selectedChemicals.length !== 2}
-            onClick={() => mixChemicals()}
-            aria-label="Mix selected chemicals"
-          >Mix</button>
-        </div>
-      </div>
+      
     </div>
   )
 }
